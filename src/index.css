@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Safe area support for iOS */
+@supports (padding: max(0px)) {
+  :root {
+    --safe-area-inset-top: env(safe-area-inset-top);
+    --safe-area-inset-right: env(safe-area-inset-right);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom);
+    --safe-area-inset-left: env(safe-area-inset-left);
+  }
+}
+
+/* Landscape mode optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Reduce padding in landscape on small screens */
+  .min-h-\[100dvh\] {
+    padding-top: max(1rem, env(safe-area-inset-top)) !important;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  }
+  
+  /* Smaller word display in landscape */
+  .text-5xl {
+    font-size: 2rem !important;
+    line-height: 2.25rem !important;
+  }
+  
+  .text-7xl {
+    font-size: 3rem !important;
+    line-height: 1 !important;
+  }
+  
+  /* Reduce button heights in landscape */
+  .h-32 {
+    height: 5rem !important;
+  }
+  
+  /* Reduce gaps */
+  .gap-6 {
+    gap: 1rem !important;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .mb-6 {
+    margin-bottom: 0.75rem !important;
+  }
+}
+
+/* Smooth scrolling for lists */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent text selection during gameplay */
+.select-none {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Hardware acceleration for animations */
+.animate-pulse, .animate-bounce {
+  will-change: transform, opacity;
+}
+
+/* Optimize touch responsiveness */
+button, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ========================================
+   ACCESSIBILITY: Reduced Motion Support
+   ======================================== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-pulse,
+  .animate-bounce {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   PERFORMANCE: GPU Acceleration
+   ======================================== */
+
+/* Promote heavy elements to their own layer */
+.transition-transform,
+.transition-all {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize modal overlays */
+.fixed.inset-0 {
+  will-change: opacity;
+}
+
+/* ========================================
+   ACTIVE STATES: Better touch feedback
+   ======================================== */
+
+button:active,
+[role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease-out;
+}
+
+/* Prevent double-tap zoom on iOS */
+button {
+  touch-action: manipulation;
+}
+
+/* ========================================
+   SCROLLBAR: Modern styling
+   ======================================== */
+
+/* Hide scrollbar but keep functionality */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
