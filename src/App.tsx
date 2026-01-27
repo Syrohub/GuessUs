@@ -3,9 +3,9 @@ import { Play, BookOpen, ChevronLeft, Check, X, Trophy, Users, AlertCircle, Tras
 import { Capacitor } from '@capacitor/core';
 import { NativeAudio } from '@capgo/native-audio';
 import { TRANSLATIONS } from './translations';
-import { WORD_DATABASE } from './words';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { haptics } from './utils/haptics';
+import { initializeDictionary, getWordDatabase } from './utils/remoteDictionary';
 
 // --- Types ---
 
@@ -319,6 +319,9 @@ const useGameEngine = () => {
     events.forEach(e => window.addEventListener(e, handleInteraction));
     document.addEventListener("visibilitychange", handleVisibilityChange);
     
+    // Initialize remote dictionary system (checks for updates in background)
+    initializeDictionary();
+    
     try {
       const savedSettings = localStorage.getItem('guessus_settings');
       const savedHistory = localStorage.getItem('guessus_history');
@@ -373,10 +376,11 @@ const useGameEngine = () => {
       }
       
       let pool: string[] = [];
+      const wordDatabase = getWordDatabase();
       activeSettings.categories.forEach(cat => {
         if (!ownedCategories.includes(cat)) return;
-        const langDB = WORD_DATABASE[activeSettings.wordLanguage] || WORD_DATABASE['en'];
-        const words = langDB?.[cat] || WORD_DATABASE['en'][cat] || [];
+        const langDB = wordDatabase[activeSettings.wordLanguage] || wordDatabase['en'];
+        const words = langDB?.[cat] || wordDatabase['en'][cat] || [];
         pool.push(...words);
       });
 
@@ -702,10 +706,25 @@ const GameTimer = memo(({ duration, onTimeUp, soundEnabled, isActive, isLastWord
   const [timeLeft, setTimeLeft] = useState(duration);
   const onTimeUpRef = useRef(onTimeUp);
   const soundEnabledRef = useRef(soundEnabled);
+  const hasTriggeredTimeUp = useRef(false);
 
   useEffect(() => { onTimeUpRef.current = onTimeUp; }, [onTimeUp]);
   useEffect(() => { soundEnabledRef.current = soundEnabled; }, [soundEnabled]);
-  useEffect(() => { setTimeLeft(duration); }, [duration]);
+  useEffect(() => { 
+    setTimeLeft(duration); 
+    hasTriggeredTimeUp.current = false; // Reset when duration changes
+  }, [duration]);
+
+  // Separate effect to handle time up - NEVER call state-changing functions inside setState!
+  useEffect(() => {
+    if (timeLeft === 0 && !hasTriggeredTimeUp.current) {
+      hasTriggeredTimeUp.current = true;
+      // Use setTimeout to ensure we're outside of any React render cycle
+      setTimeout(() => {
+        onTimeUpRef.current();
+      }, 0);
+    }
+  }, [timeLeft]);
 
   useEffect(() => {
     if (!isActive || isPaused) return;
@@ -713,12 +732,14 @@ const GameTimer = memo(({ duration, onTimeUp, soundEnabled, isActive, isLastWord
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(intervalId);
-          onTimeUpRef.current();
-          return 0;
+          return 0; // Don't call onTimeUp here - let the effect above handle it
         }
         if (prev <= 6) {
-          if (soundEnabledRef.current) soundManager.play('tick');
-          haptics.warning(); // Haptic warning when time is low
+          // Use setTimeout to avoid calling async functions inside setState
+          setTimeout(() => {
+            if (soundEnabledRef.current) soundManager.play('tick');
+            haptics.warning();
+          }, 0);
         }
         return prev - 1;
       });

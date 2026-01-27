@@ -1,8 +1,9 @@
-// Word database - lazy loaded for better performance
+// Word database - fallback when remote dictionary is unavailable
 export type Category = 'party' | 'dirty' | 'extreme';
 export type Language = 'en' | 'es' | 'ua' | 'ru';
 
-export const WORD_DATABASE: Record<Language, Record<Category, string[]>> = {
+// Default built-in dictionary (used as fallback when no internet/cache)
+export const DEFAULT_WORD_DATABASE: Record<Language, Record<Category, string[]>> = {
   ru: {
     party: [
       "Похмелье", "Текила", "Шот", "Бармен", "Вышибала", "Фейсконтроль", "Танцпол", "Диджей", "Кальян", "Вейп", "Блевотина", "Вертолеты", "Сушняк", "Запой", "Вписка", "Афтерпати", "Караоке", "Бодунище", "Пивной живот", "Егермейстер", "Самбука", "Абсент", "Тост", "Чокаться", "На посошок", "Штрафная", "Ерш", "Отвертка", "Кровавая Мэри", "Лонг-Айленд", "Секс на пляже", "Голубая лагуна", "Маргарита", "Мохито", "Пина Колада", "Дайкири", "Космополитен", "Б-52", "Хиросима", "Зеленая фея",
@@ -123,3 +124,6 @@ export const WORD_DATABASE: Record<Language, Record<Category, string[]>> = {
     ]
   }
 };
+
+// Backward-compatible alias (deprecated - use getWordDatabase() from remoteDictionary.ts)
+export const WORD_DATABASE = DEFAULT_WORD_DATABASE;
