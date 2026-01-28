@@ -10,10 +10,11 @@ type WordDatabase = Record<Language, Partial<Record<Category, string[]>>>;
 const FAMILY_WORD_DATABASE = familyWordsJson as WordDatabase;
 
 // GitHub Raw URLs for remote dictionaries
+// Public repo: https://github.com/Syrohub/guessus-dictionary
 const GITHUB_USER = 'Syrohub';
-const GITHUB_REPO = 'GuessUs';
+const GITHUB_REPO = 'guessus-dictionary';
 const BRANCH = 'main';
-const BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/remote-data`;
+const BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}`;
 
 // Variant-specific URLs
 // Family = основная версия (words.json)
