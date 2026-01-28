@@ -11,7 +11,7 @@ const FAMILY_WORD_DATABASE = familyWordsJson as WordDatabase;
 
 // GitHub Raw URLs for remote dictionaries
 const GITHUB_USER = 'Syrohub';
-const GITHUB_REPO = 'guessus-dictionary';
+const GITHUB_REPO = 'GuessUs';
 const BRANCH = 'main';
 const BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/remote-data`;
 
