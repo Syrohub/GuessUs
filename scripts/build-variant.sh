@@ -71,12 +71,16 @@ echo "✓ Set Display Name: $APP_NAME"
 /usr/libexec/PlistBuddy -c "Set :CFBundleName $APP_NAME" "$INFO_PLIST"
 echo "✓ Set Bundle Name: $APP_NAME"
 
-# 6. Обновляем project.pbxproj для App Icon
+# 6. Обновляем project.pbxproj для App Icon и Bundle ID
 PROJECT_FILE="ios/App/App.xcodeproj/project.pbxproj"
 echo ""
 echo "🎨 Setting App Icon: $APP_ICON..."
 sed -i '' "s/ASSETCATALOG_COMPILER_APPICON_NAME = [^;]*/ASSETCATALOG_COMPILER_APPICON_NAME = $APP_ICON/" "$PROJECT_FILE"
 echo "✓ Updated App Icon in project"
+
+echo "🔑 Setting Bundle ID in project: $BUNDLE_ID..."
+sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID/" "$PROJECT_FILE"
+echo "✓ Updated Bundle ID in project"
 
 echo ""
 echo "============================================="
