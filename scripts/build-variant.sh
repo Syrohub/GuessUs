@@ -80,16 +80,62 @@ echo "✓ Updated App Icon in project"
 
 echo ""
 echo "============================================="
-echo "✅ Build complete for $VARIANT!"
+echo "✅ Web build complete for $VARIANT!"
 echo ""
 echo "   Bundle ID: $BUNDLE_ID"
 echo "   App Name: $APP_NAME"
 echo "   App Icon: $APP_ICON"
 echo ""
-echo "Next steps:"
-echo "  1. Open Xcode:  npx cap open ios"
-echo "  2. Archive:     Product → Archive"
-echo "  3. Upload:      Distribute App → App Store Connect"
-echo ""
+
+# 7. Создаём Xcode Archive (если передан флаг --archive)
+if [ "$2" = "--archive" ]; then
+  echo "📦 Creating Xcode Archive..."
+  echo ""
+  
+  # Capitalize variant name for archive
+  if [ "$VARIANT" = "family" ]; then
+    VARIANT_CAP="Family"
+  else
+    VARIANT_CAP="Adult"
+  fi
+  
+  ARCHIVE_DATE=$(date +%Y-%m-%d)
+  ARCHIVE_TIME=$(date +%H.%M.%S)
+  ARCHIVE_DIR="$HOME/Library/Developer/Xcode/Archives/$ARCHIVE_DATE"
+  ARCHIVE_PATH="$ARCHIVE_DIR/GuessUs_${VARIANT_CAP}_$ARCHIVE_TIME.xcarchive"
+  
+  # Создаём директорию если не существует
+  mkdir -p "$ARCHIVE_DIR"
+  
+  cd ios/App
+  
+  # Запускаем xcodebuild archive
+  xcodebuild -workspace App.xcworkspace \
+    -scheme App \
+    -destination 'generic/platform=iOS' \
+    -archivePath "$ARCHIVE_PATH" \
+    clean archive 2>&1 \
+    | grep -E "(Compiling|Linking|Archive Succeeded|error:|warning:|\*\*)" || true
+  
+  cd ../..
+  
+  echo ""
+  echo "============================================="
+  echo "✅ Archive complete: GuessUs_${VARIANT_CAP}"
+  echo ""
+  echo "📂 Opening Xcode Organizer..."
+  echo "   Window → Organizer (or Cmd+Shift+Option+O)"
+  open -a Xcode
+  
+  echo ""
+  echo "Next step: Select archive → 'Distribute App' → 'App Store Connect'"
+  echo ""
+else
+  echo "Next steps:"
+  echo "  Option 1 (manual):  npx cap open ios → Product → Archive"
+  echo "  Option 2 (auto):    ./scripts/build-variant.sh $VARIANT --archive"
+  echo ""
+fi
+
 echo "📝 To switch variants, run this script again with different argument."
 echo ""
