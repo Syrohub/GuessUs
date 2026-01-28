@@ -1,9 +1,19 @@
 // Word database - fallback when remote dictionary is unavailable
-export type Category = 'party' | 'dirty' | 'extreme';
+
+// Adult categories (18+ version)
+export type AdultCategory = 'party' | 'dirty' | 'extreme';
+
+// Family categories (family-friendly version)
+export type FamilyCategory = 'movies' | 'food' | 'animals' | 'sports' | 'travel' | 'professions';
+
+// All possible categories
+export type Category = AdultCategory | FamilyCategory;
+
 export type Language = 'en' | 'es' | 'ua' | 'ru';
 
 // Default built-in dictionary (used as fallback when no internet/cache)
-export const DEFAULT_WORD_DATABASE: Record<Language, Record<Category, string[]>> = {
+// Uses Partial because not all categories exist for all variants
+export const DEFAULT_WORD_DATABASE: Record<Language, Partial<Record<Category, string[]>>> = {
   ru: {
     party: [
       "Похмелье", "Текила", "Шот", "Бармен", "Вышибала", "Фейсконтроль", "Танцпол", "Диджей", "Кальян", "Вейп", "Блевотина", "Вертолеты", "Сушняк", "Запой", "Вписка", "Афтерпати", "Караоке", "Бодунище", "Пивной живот", "Егермейстер", "Самбука", "Абсент", "Тост", "Чокаться", "На посошок", "Штрафная", "Ерш", "Отвертка", "Кровавая Мэри", "Лонг-Айленд", "Секс на пляже", "Голубая лагуна", "Маргарита", "Мохито", "Пина Колада", "Дайкири", "Космополитен", "Б-52", "Хиросима", "Зеленая фея",

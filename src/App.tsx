@@ -6,12 +6,19 @@ import { TRANSLATIONS } from './translations';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { haptics } from './utils/haptics';
 import { initializeDictionary, getWordDatabase } from './utils/remoteDictionary';
+import { CONFIG, APP_VARIANT } from './config';
+import { Category } from './words';
+import { 
+  initializePurchases, 
+  purchaseProduct, 
+  restorePurchases, 
+  getOwnedCategoriesFromPurchases,
+  type ProductId as IAPProductId 
+} from './utils/purchases';
 
 // --- Types ---
 
-const APP_VERSION = "1.8.0";
-
-type Category = 'party' | 'dirty' | 'extreme';
+const APP_VERSION = "1.9.0";
 type GameScreenState = 'start' | 'settings' | 'game' | 'preRound' | 'lastWord' | 'verification' | 'roundResult' | 'winner' | 'history' | 'rules';
 type Language = 'en' | 'es' | 'ua' | 'ru';
 type Theme = 'dark' | 'light';
@@ -122,7 +129,7 @@ const GET_DEFAULT_SETTINGS = (lang: Language = 'en'): GameSettings => {
         targetScore: 30,
         roundDuration: 60,
         lastWordDuration: 10,
-        categories: ['party'],
+        categories: CONFIG.defaultCategories as Category[],
         penaltyForSkip: true,
         soundEnabled: true,
         uiLanguage: lang,
@@ -267,6 +274,14 @@ const debounce = <T extends (...args: any[]) => void>(fn: T, delay: number): T =
   }) as T;
 };
 
+// Variant-specific localStorage keys to prevent conflicts between Family and Adult versions
+const STORAGE_PREFIX = APP_VARIANT === 'family' ? 'guessus_family_' : 'guessus_adult_';
+const STORAGE_KEYS = {
+  settings: `${STORAGE_PREFIX}settings`,
+  history: `${STORAGE_PREFIX}history`,
+  purchases: `${STORAGE_PREFIX}purchases`,
+};
+
 // Debounced localStorage save functions
 const saveToStorage = debounce((key: string, value: string) => {
   try {
@@ -300,7 +315,10 @@ const useGameEngine = () => {
   const [gameState, setGameState] = useState<GameScreenState>('start');
   const [settings, setSettings] = useState<GameSettings>(GET_DEFAULT_SETTINGS('en'));
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [ownedCategories, setOwnedCategories] = useState<Category[]>(['party']);
+  // For Family version: all categories are unlocked; for Adult: only 'party' is free
+  const [ownedCategories, setOwnedCategories] = useState<Category[]>(
+    CONFIG.showPaywall ? ['party'] : CONFIG.availableCategories as Category[]
+  );
   
   const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
   const [gameWords, setGameWords] = useState<string[]>([]);
@@ -322,10 +340,21 @@ const useGameEngine = () => {
     // Initialize remote dictionary system (checks for updates in background)
     initializeDictionary();
     
+    // Initialize In-App Purchases (only for Adult version)
+    if (CONFIG.showPaywall) {
+      initializePurchases().then(() => {
+        // Sync owned categories from purchases
+        const purchasedCategories = getOwnedCategoriesFromPurchases();
+        if (purchasedCategories.length > 1) { // More than just 'party'
+          setOwnedCategories(purchasedCategories as Category[]);
+        }
+      });
+    }
+    
     try {
-      const savedSettings = localStorage.getItem('guessus_settings');
-      const savedHistory = localStorage.getItem('guessus_history');
-      const savedPurchases = localStorage.getItem('alias_purchases');
+      const savedSettings = localStorage.getItem(STORAGE_KEYS.settings);
+      const savedHistory = localStorage.getItem(STORAGE_KEYS.history);
+      const savedPurchases = localStorage.getItem(STORAGE_KEYS.purchases);
 
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
@@ -335,7 +364,11 @@ const useGameEngine = () => {
         }
       }
       if (savedHistory) setHistory(JSON.parse(savedHistory));
-      if (savedPurchases) setOwnedCategories(JSON.parse(savedPurchases));
+      // For Family version: all categories are always unlocked (ignore localStorage)
+      // For Adult version: load purchased categories from localStorage
+      if (CONFIG.showPaywall && savedPurchases) {
+        setOwnedCategories(JSON.parse(savedPurchases));
+      }
     } catch (e) {
       console.error("Failed to load settings/history", e);
     }
@@ -347,16 +380,54 @@ const useGameEngine = () => {
   }, []);
 
   // Debounced localStorage saves to prevent performance issues
-  useEffect(() => { saveToStorage('guessus_settings', JSON.stringify(settings)); }, [settings]);
-  useEffect(() => { saveToStorage('guessus_history', JSON.stringify(history)); }, [history]);
-  useEffect(() => { saveToStorage('alias_purchases', JSON.stringify(ownedCategories)); }, [ownedCategories]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.settings, JSON.stringify(settings)); }, [settings]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.history, JSON.stringify(history)); }, [history]);
+  // Only save purchases for Adult version (Family has all categories unlocked)
+  useEffect(() => { 
+    if (CONFIG.showPaywall) {
+      saveToStorage(STORAGE_KEYS.purchases, JSON.stringify(ownedCategories)); 
+    }
+  }, [ownedCategories]);
 
-  const buyProduct = (productId: ProductId) => {
-      const product = PRODUCTS[productId];
-      const newOwned = [...ownedCategories, ...product.unlocks];
-      const uniqueOwned = Array.from(new Set(newOwned));
-      setOwnedCategories(uniqueOwned);
-      return true;
+  const buyProduct = async (productId: ProductId): Promise<boolean> => {
+      try {
+        // Attempt real purchase (will simulate in dev mode)
+        const success = await purchaseProduct(productId as IAPProductId);
+        
+        if (success) {
+          const product = PRODUCTS[productId];
+          const newOwned = [...ownedCategories, ...product.unlocks];
+          const uniqueOwned = Array.from(new Set(newOwned));
+          setOwnedCategories(uniqueOwned);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('Purchase failed:', error);
+        return false;
+      }
+  };
+  
+  const handleRestorePurchases = async (): Promise<void> => {
+    try {
+      const restored = await restorePurchases();
+      if (restored.length > 0) {
+        const newOwned = [...ownedCategories];
+        restored.forEach(productId => {
+          const product = PRODUCTS[productId as ProductId];
+          if (product) {
+            product.unlocks.forEach(cat => {
+              if (!newOwned.includes(cat)) {
+                newOwned.push(cat);
+              }
+            });
+          }
+        });
+        setOwnedCategories(newOwned);
+      }
+    } catch (error) {
+      console.error('Restore failed:', error);
+    }
   };
 
   const startGame = useCallback((newSettings?: GameSettings) => {
@@ -380,7 +451,7 @@ const useGameEngine = () => {
       activeSettings.categories.forEach(cat => {
         if (!ownedCategories.includes(cat)) return;
         const langDB = wordDatabase[activeSettings.wordLanguage] || wordDatabase['en'];
-        const words = langDB?.[cat] || wordDatabase['en'][cat] || [];
+        const words = langDB?.[cat] || wordDatabase['en']?.[cat] || [];
         pool.push(...words);
       });
 
@@ -520,7 +591,7 @@ const useGameEngine = () => {
   }), [startGame, startRound, handleWordAction, handleTimeUp, endRoundImmediately, handleVerificationComplete, handleNextRound]);
 
   return {
-      gameState, setGameState, settings, setSettings, history, setHistory, activeTeam, currentWord, currentRoundWords, t, themeColors, ownedCategories, buyProduct, actions
+      gameState, setGameState, settings, setSettings, history, setHistory, activeTeam, currentWord, currentRoundWords, t, themeColors, ownedCategories, buyProduct, handleRestorePurchases, actions
   };
 };
 
@@ -534,7 +605,8 @@ interface CommonProps {
 
 interface PaywallProps extends CommonProps {
     onClose: () => void;
-    onBuy: (id: ProductId) => void;
+    onBuy: (id: ProductId) => Promise<boolean>;
+    onRestore: () => Promise<void>;
     ownedCategories: Category[];
 }
 
@@ -544,7 +616,8 @@ interface SettingsViewProps extends CommonProps {
     onSave: (s: GameSettings) => void;
     onImmediateChange: (u: Partial<GameSettings>) => void;
     ownedCategories: Category[];
-    buyProduct: (id: ProductId) => boolean;
+    buyProduct: (id: ProductId) => Promise<boolean>;
+    onRestore: () => Promise<void>;
 }
 
 interface PreRoundViewProps extends CommonProps {
@@ -641,16 +714,23 @@ interface WordCardProps {
 
 // --- Components ---
 
-const PaywallModal = memo(({ onClose, onBuy, themeColors, t, isDark, ownedCategories }: PaywallProps) => {
+const PaywallModal = memo(({ onClose, onBuy, onRestore, themeColors, t, isDark, ownedCategories }: PaywallProps) => {
     const [processing, setProcessing] = useState<string|null>(null);
+    const [restoring, setRestoring] = useState(false);
 
-    const handleBuy = (id: ProductId) => {
+    const handleBuy = async (id: ProductId) => {
         setProcessing(id);
-        setTimeout(() => {
-            onBuy(id);
-            setProcessing(null);
+        const success = await onBuy(id);
+        setProcessing(null);
+        if (success) {
             onClose();
-        }, 1500);
+        }
+    };
+    
+    const handleRestore = async () => {
+        setRestoring(true);
+        await onRestore();
+        setRestoring(false);
     };
 
     const isDirtyOwned = ownedCategories.includes('dirty');
@@ -696,6 +776,14 @@ const PaywallModal = memo(({ onClose, onBuy, themeColors, t, isDark, ownedCatego
                         <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] uppercase font-black px-3 py-1.5 rounded-bl-2xl shadow-sm z-20 leading-none flex items-center justify-center">{t.bestValue}</div>
                     </button>
                 )}
+                
+                <button 
+                    onClick={handleRestore} 
+                    disabled={restoring || !!processing}
+                    className={`w-full py-3 text-sm font-medium rounded-xl transition-all ${isDark ? 'text-neutral-400 hover:text-neutral-200' : 'text-neutral-500 hover:text-neutral-700'}`}
+                >
+                    {restoring ? t.processing : (t.restorePurchases || 'Restore Purchases')}
+                </button>
             </div>
         </div>
     );
@@ -786,7 +874,11 @@ const StartView = ({ t, themeColors, onNavigate }: StartViewProps) => {
     <div className={`min-h-[100dvh] p-6 flex flex-col items-center justify-center font-sans ${themeColors.text} relative`} style={{ paddingTop: 'calc(env(safe-area-inset-top) + 5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom) + 2rem)' }}>
       <div className="absolute right-6" style={{ top: 'calc(env(safe-area-inset-top) + 4rem)' }}><button onClick={() => handleNavigate('settings')} className={`p-3 rounded-xl transition-all ${themeColors.button}`}><SettingsIcon size={24} /></button></div>
       <h1 className="text-5xl md:text-6xl font-black mb-2 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 pr-2">{t.startTitle}</h1>
-      <div className={`px-3 py-1 rounded-full text-xs font-bold tracking-widest text-pink-500 mb-8 md:mb-12 border border-pink-500/30 ${themeColors.card}`}>{t.adultsOnly}</div>
+      {CONFIG.showAdultBadge ? (
+        <div className={`px-3 py-1 rounded-full text-xs font-bold tracking-widest text-pink-500 mb-8 md:mb-12 border border-pink-500/30 ${themeColors.card}`}>{t.adultsOnly}</div>
+      ) : (
+        <div className={`px-3 py-1 rounded-full text-xs font-bold tracking-widest text-blue-500 mb-8 md:mb-12 border border-blue-500/30 ${themeColors.card}`}>{CONFIG.tagline}</div>
+      )}
       <div className="w-full max-w-xs space-y-4">
         <button onClick={() => handleNavigate('settings')} className="w-full bg-white text-black py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 shadow-xl touch-manipulation"><Play size={24} /> {t.startGame}</button>
         <div className="grid grid-cols-2 gap-4">
@@ -829,7 +921,7 @@ const TeamCard = memo(({ team, teamIdx, themeColors, isDark, t, showRemoveTeam, 
 ));
 TeamCard.displayName = 'TeamCard';
 
-const SettingsView = memo(({ t, themeColors, isDark, initialSettings, onBack, onSave, onImmediateChange, ownedCategories, buyProduct }: SettingsViewProps) => {
+const SettingsView = memo(({ t, themeColors, isDark, initialSettings, onBack, onSave, onImmediateChange, ownedCategories, buyProduct, onRestore }: SettingsViewProps) => {
   const [localSettings, setLocalSettings] = useState<GameSettings>(initialSettings);
   const [showStore, setShowStore] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
@@ -898,7 +990,8 @@ const SettingsView = memo(({ t, themeColors, isDark, initialSettings, onBack, on
   const onDrop = useCallback((e: React.DragEvent) => { e.preventDefault(); setDraggingId(null); draggedItemRef.current = null; }, []);
 
   const handleCategoryClick = (cat: Category) => {
-      const isLocked = !ownedCategories.includes(cat);
+      // Only check lock status if paywall is enabled (Adult version)
+      const isLocked = CONFIG.showPaywall && !ownedCategories.includes(cat);
       if (isLocked) { setShowStore(true); return; }
       const has = localSettings.categories.includes(cat);
       updateSettings('categories', has ? localSettings.categories.filter(c => c !== cat) : [...localSettings.categories, cat]);
@@ -980,7 +1073,7 @@ const SettingsView = memo(({ t, themeColors, isDark, initialSettings, onBack, on
 
   return (
     <div className={`min-h-[100dvh] p-6 font-sans ${themeColors.text}`} style={{ paddingTop: 'calc(env(safe-area-inset-top) + 5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom) + 8rem)' }}>
-      {showStore && <PaywallModal onClose={() => setShowStore(false)} onBuy={buyProduct} themeColors={themeColors} t={t} isDark={isDark} ownedCategories={ownedCategories} />}
+      {CONFIG.showPaywall && showStore && <PaywallModal onClose={() => setShowStore(false)} onBuy={buyProduct} onRestore={onRestore} themeColors={themeColors} t={t} isDark={isDark} ownedCategories={ownedCategories} />}
       <div className="flex items-center gap-4 mb-8"><button onClick={onBack} className="p-2 -ml-2"><ChevronLeft size={32} /></button><h2 className="text-3xl font-bold">{t.settings}</h2></div>
       <div className="space-y-8 max-w-md mx-auto">
         <div className="space-y-3"><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.theme}</h3><div className="flex gap-2 bg-neutral-800/10 p-1 rounded-xl"><button onClick={() => updateSettings('theme', 'dark')} className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 font-bold transition-all ${localSettings.theme === 'dark' ? 'bg-neutral-800 text-white shadow-md' : 'text-neutral-500'}`}><Moon size={18} /> {t.themeDark}</button><button onClick={() => updateSettings('theme', 'light')} className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 font-bold transition-all ${localSettings.theme === 'light' ? 'bg-white text-black shadow-md' : 'text-neutral-500'}`}><Sun size={18} /> {t.themeLight}</button></div></div>
@@ -990,7 +1083,7 @@ const SettingsView = memo(({ t, themeColors, isDark, initialSettings, onBack, on
         <div className="space-y-3"><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.targetScore}</h3><div className="grid grid-cols-4 gap-2">{[20, 30, 40, 50, 60, 80, 100].map(v => (<button key={v} onClick={() => updateSettings('targetScore', v)} className={`p-3 rounded-xl font-bold transition-all ${localSettings.targetScore === v ? 'bg-pink-500 text-white shadow-md' : themeColors.button}`}>{v}</button>))}</div></div>
         <div className="space-y-3"><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.roundTime}</h3><div className="grid grid-cols-4 gap-2">{[30, 45, 60, 90].map(v => (<button key={v} onClick={() => updateSettings('roundDuration', v)} className={`p-3 rounded-xl font-bold text-sm transition-all ${localSettings.roundDuration === v ? 'bg-indigo-500 text-white shadow-md' : themeColors.button}`}>{v} sec</button>))}</div></div>
         <div className="space-y-2"><label className={`font-bold text-sm ${themeColors.textSub}`}>{t.lastWordTime}</label><div className="flex gap-2">{[10, 15, 30].map(time => (<button key={time} onClick={() => updateSettings('lastWordDuration', time)} className={`flex-1 p-3 rounded-xl font-bold text-sm transition-all ${localSettings.lastWordDuration === time ? 'bg-red-500 text-white' : themeColors.button}`}>{time} sec</button>))}</div></div>
-        <div className={`space-y-3 p-4 rounded-2xl transition-colors ${categoryError ? 'bg-red-500/10 border-2 border-red-500' : ''}`}><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.categories}</h3><div className="space-y-2">{(['party', 'dirty', 'extreme'] as Category[]).map(cat => { const isLocked = !ownedCategories.includes(cat); const isSelected = localSettings.categories.includes(cat); return (<button key={cat} onClick={() => handleCategoryClick(cat)} className={`w-full p-4 rounded-xl flex items-center justify-between transition-all border-2 ${isSelected ? `border-pink-500 ${isDark ? 'bg-neutral-800' : 'bg-white'}` : `${themeColors.button} border-transparent opacity-90`}`}><div className="text-left"><div className="font-bold text-lg flex items-center gap-2">{cat === 'party' ? t.catParty : cat === 'dirty' ? t.catDirty : t.catExtreme}{isLocked && <Lock size={16} className="text-orange-500" />}</div><div className={`text-xs ${themeColors.textSub}`}>{cat === 'party' ? t.catPartyDesc : cat === 'dirty' ? t.catDirtyDesc : t.catExtremeDesc}</div></div>{isSelected ? <CheckCircle className="text-pink-500" /> : (isLocked ? <div className="bg-orange-100 text-orange-600 px-2 py-1 rounded text-xs font-bold">{cat === 'dirty' ? '$2.99' : '$4.99'}</div> : null)}</button>); })}</div></div>
+        <div className={`space-y-3 p-4 rounded-2xl transition-colors ${categoryError ? 'bg-red-500/10 border-2 border-red-500' : ''}`}><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.categories}</h3><div className="space-y-2">{(CONFIG.availableCategories as Category[]).map(cat => { const isLocked = CONFIG.showPaywall && !ownedCategories.includes(cat); const isSelected = localSettings.categories.includes(cat); const getCatName = (c: Category) => { const names: Record<string, string> = { party: t.catParty, dirty: t.catDirty, extreme: t.catExtreme, movies: t.catMovies || 'Movies', food: t.catFood || 'Food', animals: t.catAnimals || 'Animals', sports: t.catSports || 'Sports', travel: t.catTravel || 'Travel', professions: t.catProfessions || 'Professions' }; return names[c] || c; }; const getCatDesc = (c: Category) => { const descs: Record<string, string> = { party: t.catPartyDesc, dirty: t.catDirtyDesc, extreme: t.catExtremeDesc, movies: t.catMoviesDesc || 'Famous films and characters', food: t.catFoodDesc || 'Dishes and ingredients', animals: t.catAnimalsDesc || 'Animals and nature', sports: t.catSportsDesc || 'Sports and games', travel: t.catTravelDesc || 'Countries and travel', professions: t.catProfessionsDesc || 'Jobs and occupations' }; return descs[c] || ''; }; return (<button key={cat} onClick={() => handleCategoryClick(cat)} className={`w-full p-4 rounded-xl flex items-center justify-between transition-all border-2 ${isSelected ? `border-pink-500 ${isDark ? 'bg-neutral-800' : 'bg-white'}` : `${themeColors.button} border-transparent opacity-90`}`}><div className="text-left"><div className="font-bold text-lg flex items-center gap-2">{getCatName(cat)}{isLocked && <Lock size={16} className="text-orange-500" />}</div><div className={`text-xs ${themeColors.textSub}`}>{getCatDesc(cat)}</div></div>{isSelected ? <CheckCircle className="text-pink-500" /> : (isLocked ? <div className="bg-orange-100 text-orange-600 px-2 py-1 rounded text-xs font-bold">{cat === 'dirty' ? '$2.99' : '$4.99'}</div> : null)}</button>); })}</div></div>
         <button onClick={() => updateSettings('penaltyForSkip', !localSettings.penaltyForSkip)} className={`w-full p-4 rounded-xl flex items-center justify-between ${themeColors.button}`}><span className="font-bold">{t.penaltySkip}</span><div className={`w-12 h-6 rounded-full relative transition-colors ${localSettings.penaltyForSkip ? 'bg-pink-500' : 'bg-neutral-600'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${localSettings.penaltyForSkip ? 'left-7' : 'left-1'}`} /></div></button>
         <button onClick={() => updateSettings('soundEnabled', !localSettings.soundEnabled)} className={`w-full p-4 rounded-xl flex items-center justify-between ${themeColors.button}`}><div className="flex items-center gap-2"><Volume2 size={20} /><span className="font-bold">{t.sounds}</span></div><div className={`w-12 h-6 rounded-full relative transition-colors ${localSettings.soundEnabled ? 'bg-green-500' : 'bg-neutral-600'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${localSettings.soundEnabled ? 'left-7' : 'left-1'}`} /></div></button>
         <div className="fixed left-6 right-6 z-10" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}><button onClick={handleSave} className="w-full bg-white text-black py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 shadow-xl border border-neutral-200 touch-manipulation">{t.save}</button></div>
@@ -1198,14 +1291,14 @@ const RulesView = memo(({ t, themeColors, onBack }: RulesViewProps) => {
 RulesView.displayName = 'RulesView';
 
 const AppContent = () => {
-  const { gameState, setGameState, settings, setSettings, activeTeam, currentWord, currentRoundWords, t, themeColors, actions, history, setHistory, ownedCategories, buyProduct } = useGameEngine();
+  const { gameState, setGameState, settings, setSettings, activeTeam, currentWord, currentRoundWords, t, themeColors, actions, history, setHistory, ownedCategories, buyProduct, handleRestorePurchases } = useGameEngine();
   const commonProps = { t, themeColors, isDark: settings.theme === 'dark' };
   useEffect(() => { document.body.style.backgroundColor = themeColors.hexBg; }, [themeColors.hexBg]);
 
   return (
     <div className={`${themeColors.bg} transition-colors duration-300 min-h-screen`}>
       {gameState === 'start' && <StartView {...commonProps} onNavigate={setGameState} />}
-      {gameState === 'settings' && <SettingsView {...commonProps} initialSettings={settings} onBack={() => setGameState('start')} onSave={(newS: GameSettings) => actions.startGame(newS)} onImmediateChange={(upd: any) => setSettings((p:any) => ({...p, ...upd}))} ownedCategories={ownedCategories} buyProduct={buyProduct} />}
+      {gameState === 'settings' && <SettingsView {...commonProps} initialSettings={settings} onBack={() => setGameState('start')} onSave={(newS: GameSettings) => actions.startGame(newS)} onImmediateChange={(upd: any) => setSettings((p:any) => ({...p, ...upd}))} ownedCategories={ownedCategories} buyProduct={buyProduct} onRestore={handleRestorePurchases} />}
       {gameState === 'preRound' && <PreRoundView {...commonProps} team={activeTeam} allTeams={settings.teams} onStartRound={actions.startRound} onExit={() => setGameState('start')} />}
       {(gameState === 'game' || gameState === 'lastWord') && <GameView {...commonProps} team={activeTeam} word={currentWord} duration={gameState === 'lastWord' ? settings.lastWordDuration : settings.roundDuration} isLastWord={gameState === 'lastWord'} onAction={actions.handleWordAction} penaltyEnabled={settings.penaltyForSkip} soundEnabled={settings.soundEnabled} onTimeUp={actions.handleTimeUp} onExitGame={() => setGameState('start')} onEndRoundImmediately={actions.endRoundImmediately} />}
       {gameState === 'verification' && <VerificationView {...commonProps} words={currentRoundWords} onComplete={actions.handleVerificationComplete} penaltyEnabled={settings.penaltyForSkip} soundEnabled={settings.soundEnabled} />}

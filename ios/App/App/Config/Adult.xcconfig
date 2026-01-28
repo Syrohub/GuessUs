@@ -1,0 +1,8 @@
+// Adult Version Configuration
+// Bundle ID and App Name for Guess Us 18+ (17+)
+
+PRODUCT_BUNDLE_IDENTIFIER = com.chatrixllc.guessus.adult
+PRODUCT_NAME = Guess Us 18+
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIconAdult

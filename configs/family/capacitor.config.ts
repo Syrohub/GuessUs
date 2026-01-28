@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.chatrixllc.guessus.adult',
-  appName: 'Guess Us 18+',
+  appId: 'com.chatrixllc.guessus',
+  appName: 'Guess Us',
   webDir: 'dist'
 };
 

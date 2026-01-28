@@ -1,0 +1,8 @@
+// Family Version Configuration
+// Bundle ID and App Name for Guess Us Family (4+)
+
+PRODUCT_BUNDLE_IDENTIFIER = com.chatrixllc.guessus
+PRODUCT_NAME = Guess Us
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIconFamily

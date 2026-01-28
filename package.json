@@ -5,14 +5,23 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:family": "cp configs/family/.env.family .env && vite",
+    "dev:adult": "cp configs/adult/.env.adult .env && vite",
     "build": "vite build",
+    "build:family": "./scripts/build-variant.sh family",
+    "build:adult": "./scripts/build-variant.sh adult",
     "preview": "vite preview",
     "cap:sync": "npx cap sync",
     "cap:copy": "npx cap copy",
     "cap:open:ios": "npx cap open ios",
     "cap:open:android": "npx cap open android",
     "update:ios": "npm run build && npx cap sync ios",
-    "update:ios:open": "npm run build && npx cap sync ios && npx cap open ios"
+    "update:ios:open": "npm run build && npx cap sync ios && npx cap open ios",
+    "update:ios:family": "npm run build:family && npx cap open ios",
+    "update:ios:adult": "npm run build:adult && npx cap open ios",
+    "deploy:family": "npm run build:family && cd ios/App && fastlane family",
+    "deploy:adult": "npm run build:adult && cd ios/App && fastlane adult",
+    "deploy:all": "./scripts/deploy-all.sh"
   },
   "dependencies": {
     "@capacitor/cli": "^7.4.4",
@@ -21,6 +30,7 @@
     "@capacitor/ios": "^7.4.4",
     "@capgo/native-audio": "^7.11.2",
     "classnames": "^2.3.2",
+    "cordova-plugin-purchase": "^13.12.1",
     "lucide-react": "^0.294.0",
     "mobile-drag-drop": "^2.3.0-rc.2",
     "react": "^18.2.0",

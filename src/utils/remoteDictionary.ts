@@ -1,22 +1,45 @@
 import { DEFAULT_WORD_DATABASE, Category, Language } from '../words';
+import { APP_VARIANT } from '../config';
 
-// GitHub Raw URLs for remote dictionary
+// Import Family dictionary (bundled in app as fallback)
+import familyWordsJson from '../data/words-family.json';
+
+// Type for word database
+type WordDatabase = Record<Language, Partial<Record<Category, string[]>>>;
+
+const FAMILY_WORD_DATABASE = familyWordsJson as WordDatabase;
+
+// GitHub Raw URLs for remote dictionaries
 const GITHUB_USER = 'Syrohub';
 const GITHUB_REPO = 'guessus-dictionary';
 const BRANCH = 'main';
+const BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/remote-data`;
 
-const VERSION_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/remote-data/version.json`;
-const WORDS_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/remote-data/words.json`;
+// Variant-specific URLs
+// Family = основная версия (words.json)
+// Adult = 18+ версия (words-adult.json)
+const REMOTE_CONFIG = {
+  family: {
+    versionUrl: `${BASE_URL}/version.json`,
+    wordsUrl: `${BASE_URL}/words.json`,
+  },
+  adult: {
+    versionUrl: `${BASE_URL}/version-adult.json`,
+    wordsUrl: `${BASE_URL}/words-adult.json`,
+  }
+};
 
-// localStorage keys
-const STORAGE_KEY_WORDS = 'guessus_remote_words';
-const STORAGE_KEY_VERSION = 'guessus_words_version';
+// Get URLs for current variant
+const VERSION_URL = REMOTE_CONFIG[APP_VARIANT].versionUrl;
+const WORDS_URL = REMOTE_CONFIG[APP_VARIANT].wordsUrl;
+
+// localStorage keys (variant-specific to avoid conflicts)
+const STORAGE_KEY_WORDS = `guessus_remote_words_${APP_VARIANT}`;
+const STORAGE_KEY_VERSION = `guessus_words_version_${APP_VARIANT}`;
 
 // Timeouts
 const VERSION_CHECK_TIMEOUT = 3000; // 3 seconds
 const WORDS_DOWNLOAD_TIMEOUT = 10000; // 10 seconds
-
-type WordDatabase = Record<Language, Record<Category, string[]>>;
 
 interface VersionInfo {
   version: string;
@@ -142,25 +165,35 @@ export async function checkForUpdates(): Promise<boolean> {
 
 /**
  * Get the word database to use in the game
- * Returns cached remote dictionary if available, otherwise falls back to default
+ * Both versions try: cached remote → built-in fallback
  */
 export function getWordDatabase(): WordDatabase {
+  // Try cached remote dictionary first
   const cached = getCachedWords();
   
   if (cached) {
-    console.log('Using cached remote dictionary');
+    console.log(`Using cached remote dictionary (${APP_VARIANT})`);
     return cached;
   }
   
-  console.log('Using default built-in dictionary');
-  return DEFAULT_WORD_DATABASE;
+  // Fallback to built-in dictionary
+  if (APP_VARIANT === 'family') {
+    console.log('Using built-in Family dictionary');
+    return FAMILY_WORD_DATABASE;
+  }
+  
+  console.log('Using built-in Adult dictionary');
+  return DEFAULT_WORD_DATABASE as WordDatabase;
 }
 
 /**
  * Initialize dictionary system
  * Call this on app startup to begin background update check
+ * Both versions check for remote updates from GitHub
  */
 export function initializeDictionary(): void {
+  console.log(`Initializing dictionary for ${APP_VARIANT} variant...`);
+  
   // Start update check in background (non-blocking)
   checkForUpdates().then(updated => {
     if (updated) {

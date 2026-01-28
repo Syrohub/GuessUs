@@ -1,0 +1,84 @@
+# Fastfile for Guess Us
+# 
+# Usage:
+#   fastlane adult    - Build and upload Adult version
+#   fastlane family   - Build and upload Family version  
+#   fastlane all      - Build and upload both versions
+
+default_platform(:ios)
+
+platform :ios do
+
+  # ============================================
+  # Adult Version (18+)
+  # ============================================
+  desc "Build and upload Adult version to TestFlight"
+  lane :adult do
+    UI.message("🔧 Building Adult version...")
+    
+    # Build app
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      output_name: "GuessUsAdult.ipa",
+      clean: true,
+      export_options: {
+        signingStyle: "automatic",
+        provisioningProfiles: {
+          "com.chatrixllc.guessus.adult" => "iOS Team Store Provisioning Profile: com.chatrixllc.guessus.adult"
+        }
+      }
+    )
+    
+    # Upload to TestFlight
+    UI.message("🚀 Uploading Adult to TestFlight...")
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      app_identifier: "com.chatrixllc.guessus.adult"
+    )
+    
+    UI.success("✅ Adult version uploaded!")
+  end
+
+  # ============================================
+  # Family Version
+  # ============================================
+  desc "Build and upload Family version to TestFlight"
+  lane :family do
+    UI.message("🔧 Building Family version...")
+    
+    # Build app
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      output_name: "GuessUsFamily.ipa",
+      clean: true
+    )
+    
+    # Upload to TestFlight
+    UI.message("🚀 Uploading Family to TestFlight...")
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      app_identifier: "com.chatrixllc.guessus"
+    )
+    
+    UI.success("✅ Family version uploaded!")
+  end
+
+  # ============================================
+  # Both Versions
+  # ============================================
+  desc "Build and upload both versions"
+  lane :all do
+    UI.message("🚀 Building and uploading both versions...")
+    
+    # Note: Run build-variant.sh before each fastlane command
+    # This lane assumes you've already run the build scripts
+    
+    UI.error("⚠️  Please use deploy:all from project root instead!")
+    UI.error("   It will build web assets before uploading.")
+  end
+
+end

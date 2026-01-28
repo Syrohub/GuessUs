@@ -1,0 +1,10 @@
+# Appfile for Guess Us
+
+# Your Apple ID email
+apple_id("ceo@chatrixllc.com")
+
+# Your Team ID (from Apple Developer Portal)
+team_id("24W58S698S")
+
+# App Store Connect Team ID
+itc_team_id("24W58S698S")
