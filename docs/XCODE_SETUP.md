@@ -83,8 +83,8 @@ npx cap open ios
 
 ## Bundle ID
 
-- Family: `com.guessus.family`
-- Adult: `com.guessus.adult`
+- Family: `com.chatrixllc.guessus`
+- Adult: `com.chatrixllc.guessus.adult`
 
 Эти ID нужно зарегистрировать в Apple Developer Portal.
 

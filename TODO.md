@@ -13,7 +13,7 @@
 ### Две версии приложения:
 | | Family | Adult |
 |---|--------|-------|
-| Bundle ID | `com.guessus.family` | `com.guessus.adult` |
+| Bundle ID | `com.chatrixllc.guessus` | `com.chatrixllc.guessus.adult` |
 | Рейтинг | 4+ | 17+ |
 | Категории | Все бесплатно | Платные dirty/extreme |
 | IAP | ❌ | ✅ |
@@ -45,8 +45,8 @@
 ## 🚀 TODO для App Store релиза
 
 ### 1. App Store Connect — Проверить настройки
-- [ ] Bundle ID зарегистрирован: `com.guessus.family`
-- [ ] Bundle ID зарегистрирован: `com.guessus.adult`
+- [ ] Bundle ID зарегистрирован: `com.chatrixllc.guessus`
+- [ ] Bundle ID зарегистрирован: `com.chatrixllc.guessus.adult`
 - [ ] Приложение создано в App Store Connect (Family)
 - [ ] Приложение создано в App Store Connect (Adult)
 - [ ] IAP продукты созданы и **approved** (Adult версия)
@@ -98,7 +98,7 @@ dirty: 'com.chatrixllc.guessus.adult.dirty'
 ```
 В документации:
 ```
-com.guessus.adult.dirty
+com.chatrixllc.guessus.adult.dirty
 ```
 **→ Нужно синхронизировать!**
 
@@ -134,7 +134,7 @@ npm run archive:adult
 ## ❓ Нужна информация от тебя
 
 1. **Bundle ID — какой правильный?**
-   - `com.guessus.adult` или `com.chatrixllc.guessus.adult`?
+   - `com.chatrixllc.guessus.adult` или `com.chatrixllc.guessus.adult`?
 
 2. **App Store Connect:**
    - IAP продукты уже созданы?

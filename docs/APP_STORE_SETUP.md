@@ -3,8 +3,8 @@
 ## Обзор
 
 Вам нужно создать **два приложения** в App Store Connect:
-1. **Guess Us** (Family) - com.guessus.family (4+)
-2. **Guess Us 18+** (Adult) - com.guessus.adult (17+)
+1. **Guess Us** (Family) - com.chatrixllc.guessus (4+)
+2. **Guess Us 18+** (Adult) - com.chatrixllc.guessus.adult (17+)
 
 ## Шаг 1: Регистрация Bundle IDs в Apple Developer
 
@@ -14,12 +14,12 @@
 
 ### Family версия:
 - **Description**: Guess Us Family
-- **Bundle ID**: `com.guessus.family` (Explicit)
+- **Bundle ID**: `com.chatrixllc.guessus` (Explicit)
 - **Capabilities**: (по умолчанию достаточно)
 
 ### Adult версия:
 - **Description**: Guess Us Adult
-- **Bundle ID**: `com.guessus.adult` (Explicit)
+- **Bundle ID**: `com.chatrixllc.guessus.adult` (Explicit)
 - **Capabilities**:
   - ✅ In-App Purchase (обязательно для IAP)
 
@@ -32,14 +32,14 @@
 - **Платформы**: iOS
 - **Название**: Guess Us
 - **Основной язык**: English (U.S.) или Russian
-- **Идентификатор пакета**: com.guessus.family
+- **Идентификатор пакета**: com.chatrixllc.guessus
 - **SKU**: guessus-family
 
 ### Adult версия:
 - **Платформы**: iOS
 - **Название**: Guess Us 18+
 - **Основной язык**: English (U.S.) или Russian
-- **Идентификатор пакета**: com.guessus.adult
+- **Идентификатор пакета**: com.chatrixllc.guessus.adult
 - **SKU**: guessus-adult
 
 ## Шаг 3: Настройка In-App Purchases (только Adult версия)
@@ -50,7 +50,7 @@
 ### Dirty Pack
 - **Тип**: Non-Consumable (Непотребляемый)
 - **Reference Name**: Dirty Pack
-- **Product ID**: `com.guessus.adult.dirty`
+- **Product ID**: `com.chatrixllc.guessus.adult.dirty`
 - **Цена**: Tier 3 ($2.99)
 - **Локализации**:
   - EN: "Dirty Pack" / "Unlock intimate and passionate word categories"
@@ -59,7 +59,7 @@
 ### Extreme Pack
 - **Тип**: Non-Consumable
 - **Reference Name**: Extreme Pack
-- **Product ID**: `com.guessus.adult.extreme`
+- **Product ID**: `com.chatrixllc.guessus.adult.extreme`
 - **Цена**: Tier 5 ($4.99)
 - **Локализации**:
   - EN: "Extreme Pack" / "For the boldest players only"
@@ -68,7 +68,7 @@
 ### Bundle (All Access)
 - **Тип**: Non-Consumable
 - **Reference Name**: All Access Bundle
-- **Product ID**: `com.guessus.adult.bundle`
+- **Product ID**: `com.chatrixllc.guessus.adult.bundle`
 - **Цена**: Tier 6 ($5.99)
 - **Локализации**:
   - EN: "All Access Bundle" / "Unlock all premium word categories"
