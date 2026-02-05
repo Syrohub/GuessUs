@@ -6,6 +6,10 @@
 
 import { CONFIG } from '../config';
 
+// Development mode - set to true to simulate purchases without App Store Connect
+// Set to false for production!
+const DEV_MODE = true;
+
 // Product IDs (must match App Store Connect)
 export const PRODUCT_IDS = {
   dirty: 'com.chatrixllc.guessus.adult.dirty',
@@ -227,8 +231,8 @@ export async function purchaseProduct(productId: ProductId): Promise<boolean> {
   const storeId = PRODUCT_IDS[productId];
   
   // Development mode: simulate purchase
-  if (!store || !isStoreAvailable()) {
-    console.log('Purchases: Simulating purchase for', productId);
+  if (DEV_MODE || !store || !isStoreAvailable()) {
+    console.log('Purchases: Simulating purchase for', productId, '(DEV_MODE)');
     
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -285,9 +289,10 @@ export async function purchaseProduct(productId: ProductId): Promise<boolean> {
  * Restore previous purchases
  */
 export async function restorePurchases(): Promise<string[]> {
-  if (!store || !isStoreAvailable()) {
-    console.log('Purchases: Restore not available');
-    return [];
+  if (DEV_MODE || !store || !isStoreAvailable()) {
+    console.log('Purchases: Restore simulated (DEV_MODE)');
+    // In dev mode, return all owned from cache
+    return Array.from(products.values()).filter(p => p.owned).map(p => p.id);
   }
 
   return new Promise((resolve) => {
