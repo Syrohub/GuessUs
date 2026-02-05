@@ -8,7 +8,7 @@ import { CONFIG } from '../config';
 
 // Development mode - set to true to simulate purchases without App Store Connect
 // Set to false for production!
-const DEV_MODE = true;
+const DEV_MODE = false;
 
 // Product IDs (must match App Store Connect)
 export const PRODUCT_IDS = {
