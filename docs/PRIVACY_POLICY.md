@@ -1,3 +1,8 @@
+---
+layout: default
+title: Privacy Policy
+---
+
 # Privacy Policy for Guess Us
 
 **Last updated: January 2026**

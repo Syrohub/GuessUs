@@ -1,0 +1,12 @@
+title: GuessUs Legal
+description: Privacy Policy and Terms of Service for GuessUs
+theme: jekyll-theme-minimal
+markdown: kramdown
+
+# Render .md files
+include:
+  - PRIVACY_POLICY.md
+  - TERMS_OF_SERVICE.md
+
+# Clean URLs
+permalink: pretty

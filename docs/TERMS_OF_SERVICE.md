@@ -1,3 +1,8 @@
+---
+layout: default
+title: Terms of Service
+---
+
 # Terms of Service for Guess Us
 
 **Last updated: January 2026**
