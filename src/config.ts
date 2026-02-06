@@ -38,9 +38,18 @@ export const VARIANT_CONFIG: Record<AppVariant, VariantConfig> = {
     appName: 'Guess Us',
     tagline: 'Family Fun',
     ageRating: '4+',
-    availableCategories: ['movies', 'food', 'animals', 'sports', 'travel', 'professions'],
-    defaultCategories: ['movies', 'food', 'animals'],
-    showPaywall: false,
+    // All 15 categories: Kids (5 free) + Teens (5 paid) + Adults (5 paid)
+    availableCategories: [
+      // Kids Pack - FREE
+      'animals', 'food', 'cartoons', 'toys', 'nature',
+      // Teens Pack - $0.99
+      'movies', 'sports', 'music', 'videogames', 'superheroes',
+      // Adults Pack - $1.99
+      'travel', 'professions', 'history', 'science', 'brands'
+    ],
+    // Kids categories are free by default
+    defaultCategories: ['animals', 'food', 'cartoons', 'toys', 'nature'],
+    showPaywall: true, // Family now has IAP too
     showAdultBadge: false,
     crossPromoAppId: 'com.chatrixllc.guessus.adult',
     crossPromoText: {

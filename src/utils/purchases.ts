@@ -1,23 +1,35 @@
 /**
  * In-App Purchases Service
  * Uses cordova-plugin-purchase for StoreKit integration
- * Only active in Adult version (CONFIG.showPaywall === true)
+ * Active for both Adult and Family versions (CONFIG.showPaywall === true)
  */
 
-import { CONFIG } from '../config';
+import { CONFIG, APP_VARIANT } from '../config';
 
 // Development mode - set to true to simulate purchases without App Store Connect
 // Set to false for production!
 const DEV_MODE = false;
 
-// Product IDs (must match App Store Connect)
-export const PRODUCT_IDS = {
+// Adult Product IDs (must match App Store Connect)
+export const ADULT_PRODUCT_IDS = {
   dirty: 'com.chatrixllc.guessus.adult.dirty',
   extreme: 'com.chatrixllc.guessus.adult.extreme',
   bundle: 'com.chatrixllc.guessus.adult.bundle',
 } as const;
 
-export type ProductId = keyof typeof PRODUCT_IDS;
+// Family Product IDs (must match App Store Connect)
+export const FAMILY_PRODUCT_IDS = {
+  teens: 'com.chatrixllc.guessus.teens',
+  adults: 'com.chatrixllc.guessus.adults',
+  bundle: 'com.chatrixllc.guessus.family.bundle',
+} as const;
+
+// Select the correct product IDs based on app variant
+export const PRODUCT_IDS = APP_VARIANT === 'family' ? FAMILY_PRODUCT_IDS : ADULT_PRODUCT_IDS;
+
+export type AdultProductId = keyof typeof ADULT_PRODUCT_IDS;
+export type FamilyProductId = keyof typeof FAMILY_PRODUCT_IDS;
+export type ProductId = AdultProductId | FamilyProductId;
 
 export interface PurchaseProduct {
   id: ProductId;
@@ -63,8 +75,8 @@ export async function initializePurchases(): Promise<void> {
     const CdvPurchase = (window as any).CdvPurchase;
     store = CdvPurchase.store;
     
-    // Set verbosity for debugging (remove in production)
-    store.verbosity = CdvPurchase.LogLevel.DEBUG;
+    // Set verbosity (WARNING for production)
+    store.verbosity = CdvPurchase.LogLevel.WARNING;
 
     // Register products
     store.register([
@@ -326,17 +338,36 @@ export async function restorePurchases(): Promise<string[]> {
 
 /**
  * Get owned categories based on purchased products
+ * Logic differs between Adult and Family versions
  */
 export function getOwnedCategoriesFromPurchases(): string[] {
-  const owned: string[] = ['party']; // Party is always free
-  
-  if (isProductOwned('dirty') || isProductOwned('bundle')) {
-    owned.push('dirty');
+  if (APP_VARIANT === 'family') {
+    // Family version: Kids pack is free, Teens and Adults are paid
+    const owned: string[] = ['animals', 'food', 'cartoons', 'toys', 'nature']; // Kids Pack - FREE
+    
+    // Check Teens Pack ($0.99)
+    if (isProductOwned('teens' as ProductId) || isProductOwned('bundle' as ProductId)) {
+      owned.push('movies', 'sports', 'music', 'videogames', 'superheroes');
+    }
+    
+    // Check Adults Pack ($1.99)
+    if (isProductOwned('adults' as ProductId) || isProductOwned('bundle' as ProductId)) {
+      owned.push('travel', 'professions', 'history', 'science', 'brands');
+    }
+    
+    return owned;
+  } else {
+    // Adult version: Party is free, Dirty and Extreme are paid
+    const owned: string[] = ['party']; // Party is always free
+    
+    if (isProductOwned('dirty' as ProductId) || isProductOwned('bundle' as ProductId)) {
+      owned.push('dirty');
+    }
+    
+    if (isProductOwned('extreme' as ProductId) || isProductOwned('bundle' as ProductId)) {
+      owned.push('extreme');
+    }
+    
+    return owned;
   }
-  
-  if (isProductOwned('extreme') || isProductOwned('bundle')) {
-    owned.push('extreme');
-  }
-  
-  return owned;
 }

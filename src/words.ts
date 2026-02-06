@@ -3,8 +3,23 @@
 // Adult categories (18+ version)
 export type AdultCategory = 'party' | 'dirty' | 'extreme';
 
-// Family categories (family-friendly version)
-export type FamilyCategory = 'movies' | 'food' | 'animals' | 'sports' | 'travel' | 'professions';
+// Family categories (family-friendly version) - organized into packs
+// Kids Pack - FREE
+export type FamilyKidsCategory = 'animals' | 'food' | 'cartoons' | 'toys' | 'nature';
+// Teens Pack - $0.99
+export type FamilyTeensCategory = 'movies' | 'sports' | 'music' | 'videogames' | 'superheroes';
+// Adults Pack - $1.99
+export type FamilyAdultsCategory = 'travel' | 'professions' | 'history' | 'science' | 'brands';
+
+// All Family categories combined
+export type FamilyCategory = FamilyKidsCategory | FamilyTeensCategory | FamilyAdultsCategory;
+
+// Family category packs for IAP
+export const FAMILY_CATEGORY_PACKS = {
+  kids: ['animals', 'food', 'cartoons', 'toys', 'nature'] as FamilyKidsCategory[],
+  teens: ['movies', 'sports', 'music', 'videogames', 'superheroes'] as FamilyTeensCategory[],
+  adults: ['travel', 'professions', 'history', 'science', 'brands'] as FamilyAdultsCategory[],
+} as const;
 
 // All possible categories
 export type Category = AdultCategory | FamilyCategory;
