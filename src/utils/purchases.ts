@@ -13,15 +13,11 @@ const DEV_MODE = false;
 // Adult Product IDs (must match App Store Connect)
 export const ADULT_PRODUCT_IDS = {
   dirty: 'com.chatrixllc.guessus.adult.dirty',
-  extreme: 'com.chatrixllc.guessus.adult.extreme',
-  bundle: 'com.chatrixllc.guessus.adult.bundle',
 } as const;
 
 // Family Product IDs (must match App Store Connect)
 export const FAMILY_PRODUCT_IDS = {
-  teens: 'com.chatrixllc.guessus.teens',
-  adults: 'com.chatrixllc.guessus.adults',
-  bundle: 'com.chatrixllc.guessus.family.bundle',
+  premium: 'com.chatrixllc.guessus.premium',
 } as const;
 
 // Select the correct product IDs based on app variant
@@ -79,23 +75,12 @@ export async function initializePurchases(): Promise<void> {
     store.verbosity = CdvPurchase.LogLevel.WARNING;
 
     // Register products
-    store.register([
-      {
-        id: PRODUCT_IDS.dirty,
-        type: CdvPurchase.ProductType.NON_CONSUMABLE,
-        platform: CdvPurchase.Platform.APPLE_APPSTORE,
-      },
-      {
-        id: PRODUCT_IDS.extreme,
-        type: CdvPurchase.ProductType.NON_CONSUMABLE,
-        platform: CdvPurchase.Platform.APPLE_APPSTORE,
-      },
-      {
-        id: PRODUCT_IDS.bundle,
-        type: CdvPurchase.ProductType.NON_CONSUMABLE,
-        platform: CdvPurchase.Platform.APPLE_APPSTORE,
-      },
-    ]);
+    const productEntries = Object.values(PRODUCT_IDS).map(id => ({
+      id,
+      type: CdvPurchase.ProductType.NON_CONSUMABLE,
+      platform: CdvPurchase.Platform.APPLE_APPSTORE,
+    }));
+    store.register(productEntries);
 
     // Handle approved transactions
     store.when().approved((transaction: any) => {
@@ -191,10 +176,11 @@ async function refreshProducts(): Promise<void> {
       });
     } else {
       // Fallback for testing/development
+      const fallbackPrice = APP_VARIANT === 'family' ? '$1.99' : '$2.99';
       products.set(productId as ProductId, {
         id: productId as ProductId,
         storeId,
-        price: productId === 'bundle' ? '$5.99' : productId === 'extreme' ? '$4.99' : '$2.99',
+        price: fallbackPrice,
         title: productId,
         description: '',
         owned: false,
@@ -210,10 +196,13 @@ export function getProducts(): PurchaseProduct[] {
   // Return cached products or defaults
   if (products.size === 0) {
     // Return defaults for development/testing
+    if (APP_VARIANT === 'family') {
+      return [
+        { id: 'premium' as ProductId, storeId: FAMILY_PRODUCT_IDS.premium, price: '$1.99', title: 'Premium', description: '', owned: false },
+      ];
+    }
     return [
-      { id: 'dirty', storeId: PRODUCT_IDS.dirty, price: '$2.99', title: 'Dirty', description: '', owned: false },
-      { id: 'extreme', storeId: PRODUCT_IDS.extreme, price: '$4.99', title: 'Extreme', description: '', owned: false },
-      { id: 'bundle', storeId: PRODUCT_IDS.bundle, price: '$5.99', title: 'Bundle', description: '', owned: false },
+      { id: 'dirty' as ProductId, storeId: ADULT_PRODUCT_IDS.dirty, price: '$2.99', title: 'Dirty', description: '', owned: false },
     ];
   }
   
@@ -342,30 +331,20 @@ export async function restorePurchases(): Promise<string[]> {
  */
 export function getOwnedCategoriesFromPurchases(): string[] {
   if (APP_VARIANT === 'family') {
-    // Family version: Kids pack is free, Teens and Adults are paid
-    const owned: string[] = ['animals', 'food', 'cartoons', 'toys', 'nature']; // Kids Pack - FREE
+    // Family version: animals, food, movies are FREE; sports, travel, professions require premium
+    const owned: string[] = ['animals', 'food', 'movies']; // FREE
     
-    // Check Teens Pack ($0.99)
-    if (isProductOwned('teens' as ProductId) || isProductOwned('bundle' as ProductId)) {
-      owned.push('movies', 'sports', 'music', 'videogames', 'superheroes');
-    }
-    
-    // Check Adults Pack ($1.99)
-    if (isProductOwned('adults' as ProductId) || isProductOwned('bundle' as ProductId)) {
-      owned.push('travel', 'professions', 'history', 'science', 'brands');
+    if (isProductOwned('premium' as ProductId)) {
+      owned.push('sports', 'travel', 'professions');
     }
     
     return owned;
   } else {
-    // Adult version: Party is free, Dirty and Extreme are paid
+    // Adult version: Party is free, Dirty is paid
     const owned: string[] = ['party']; // Party is always free
     
-    if (isProductOwned('dirty' as ProductId) || isProductOwned('bundle' as ProductId)) {
+    if (isProductOwned('dirty' as ProductId)) {
       owned.push('dirty');
-    }
-    
-    if (isProductOwned('extreme' as ProductId) || isProductOwned('bundle' as ProductId)) {
-      owned.push('extreme');
     }
     
     return owned;

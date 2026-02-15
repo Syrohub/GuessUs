@@ -1,6 +1,6 @@
 // --- Core Types ---
 
-export type Category = 'party' | 'dirty' | 'extreme';
+export type Category = 'party' | 'dirty';
 export type GameScreenState = 'start' | 'settings' | 'game' | 'preRound' | 'lastWord' | 'verification' | 'roundResult' | 'winner' | 'history' | 'rules';
 export type Language = 'en' | 'es' | 'ua' | 'ru';
 export type Theme = 'dark' | 'light';
@@ -51,7 +51,7 @@ export interface RoundWord {
 }
 
 // --- Monetization Types ---
-export type ProductId = 'dirty' | 'extreme' | 'bundle';
+export type ProductId = 'dirty' | 'premium';
 
 export interface Product {
     id: ProductId;

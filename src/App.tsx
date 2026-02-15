@@ -81,8 +81,8 @@ interface RoundWord {
 }
 
 // --- Monetization Types ---
-type AdultProductId = 'dirty' | 'extreme' | 'bundle';
-type FamilyProductId = 'teens' | 'adults' | 'bundle';
+type AdultProductId = 'dirty';
+type FamilyProductId = 'premium';
 type ProductId = AdultProductId | FamilyProductId;
 
 interface Product {
@@ -94,15 +94,11 @@ interface Product {
 // Adult version products
 const ADULT_PRODUCTS: Record<AdultProductId, Product> = {
     dirty: { id: 'dirty', price: '$2.99', unlocks: ['dirty'] },
-    extreme: { id: 'extreme', price: '$4.99', unlocks: ['extreme'] },
-    bundle: { id: 'bundle', price: '$6.99', unlocks: ['dirty', 'extreme'] }
 };
 
 // Family version products
 const FAMILY_PRODUCTS: Record<FamilyProductId, Product> = {
-    teens: { id: 'teens', price: '$0.99', unlocks: ['movies', 'sports', 'music', 'videogames', 'superheroes'] },
-    adults: { id: 'adults', price: '$1.99', unlocks: ['travel', 'professions', 'history', 'science', 'brands'] },
-    bundle: { id: 'bundle', price: '$1.99', unlocks: ['movies', 'sports', 'music', 'videogames', 'superheroes', 'travel', 'professions', 'history', 'science', 'brands'] }
+    premium: { id: 'premium', price: '$1.99', unlocks: ['sports', 'travel', 'professions'] },
 };
 
 // Select products based on app variant
@@ -110,7 +106,7 @@ const PRODUCTS = APP_VARIANT === 'family' ? FAMILY_PRODUCTS : ADULT_PRODUCTS;
 
 // Free categories by variant
 const FREE_CATEGORIES: Category[] = APP_VARIANT === 'family' 
-    ? ['animals', 'food', 'cartoons', 'toys', 'nature'] // Kids Pack FREE
+    ? ['animals', 'food', 'movies'] // FREE categories
     : ['party']; // Party FREE
 
 // --- Constants & Defaults ---
@@ -886,8 +882,6 @@ const PaywallModal = memo(({ onClose, onBuy, onRestore, themeColors, t, isDark, 
 
     // Adult version paywall (original)
     const isDirtyOwned = ownedCategories.includes('dirty');
-    const isExtremeOwned = ownedCategories.includes('extreme');
-    const showBundle = !isDirtyOwned && !isExtremeOwned;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -910,22 +904,11 @@ const PaywallModal = memo(({ onClose, onBuy, onRestore, themeColors, t, isDark, 
                             <button onClick={() => handleBuy('dirty' as ProductId)} disabled={!!processing} className="bg-neutral-200 dark:bg-neutral-700 px-4 py-2 rounded-lg font-bold text-sm min-w-[80px]">{processing === 'dirty' ? t.processing : ADULT_PRODUCTS.dirty.price}</button>
                         )}
                     </div>
-                    <div className={`p-4 rounded-xl border flex justify-between items-center ${isDark ? 'bg-neutral-800 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
-                        <div><div className="font-bold">{t.catExtreme}</div><div className="text-xs opacity-60">{t.catExtremeDesc}</div></div>
-                        {isExtremeOwned ? (
-                            <div className="bg-green-100 text-green-700 px-3 py-2 rounded-lg font-bold text-sm flex items-center gap-1"><CheckCircle size={14}/> Owned</div>
-                        ) : (
-                            <button onClick={() => handleBuy('extreme' as ProductId)} disabled={!!processing} className="bg-neutral-200 dark:bg-neutral-700 px-4 py-2 rounded-lg font-bold text-sm min-w-[80px]">{processing === 'extreme' ? t.processing : ADULT_PRODUCTS.extreme.price}</button>
-                        )}
-                    </div>
                 </div>
 
-                {showBundle && (
-                    <button onClick={() => handleBuy('bundle')} disabled={!!processing} className="w-full bg-gradient-to-r from-pink-500 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl relative overflow-hidden group touch-manipulation active:scale-[0.98] transition-transform">
-                        <div className="relative z-10 flex items-center justify-center gap-2 px-8">
-                            {processing === 'bundle' ? t.processing : (<><Sparkles size={20} className="text-yellow-200 shrink-0" /><span className="truncate">{t.unlockAll} {ADULT_PRODUCTS.bundle.price}</span></>)}
-                        </div>
-                        <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] uppercase font-black px-3 py-1.5 rounded-bl-2xl shadow-sm z-20 leading-none flex items-center justify-center">{t.bestValue}</div>
+                {!isDirtyOwned && (
+                    <button onClick={() => handleBuy('dirty' as ProductId)} disabled={!!processing} className="w-full bg-gradient-to-r from-pink-500 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl touch-manipulation active:scale-[0.98] transition-transform">
+                        {processing === 'dirty' ? t.processing : `${t.catDirty} ${ADULT_PRODUCTS.dirty.price}`}
                     </button>
                 )}
                 
@@ -1235,7 +1218,7 @@ const SettingsView = memo(({ t, themeColors, isDark, initialSettings, onBack, on
         <div className="space-y-3"><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.targetScore}</h3><div className="grid grid-cols-4 gap-2">{[20, 30, 40, 50, 60, 80, 100].map(v => (<button key={v} onClick={() => updateSettings('targetScore', v)} className={`p-3 rounded-xl font-bold transition-all ${localSettings.targetScore === v ? 'bg-pink-500 text-white shadow-md' : themeColors.button}`}>{v}</button>))}</div></div>
         <div className="space-y-3"><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.roundTime}</h3><div className="grid grid-cols-4 gap-2">{[30, 45, 60, 90].map(v => (<button key={v} onClick={() => updateSettings('roundDuration', v)} className={`p-3 rounded-xl font-bold text-sm transition-all ${localSettings.roundDuration === v ? 'bg-indigo-500 text-white shadow-md' : themeColors.button}`}>{v} sec</button>))}</div></div>
         <div className="space-y-2"><label className={`font-bold text-sm ${themeColors.textSub}`}>{t.lastWordTime}</label><div className="flex gap-2">{[10, 15, 30].map(time => (<button key={time} onClick={() => updateSettings('lastWordDuration', time)} className={`flex-1 p-3 rounded-xl font-bold text-sm transition-all ${localSettings.lastWordDuration === time ? 'bg-red-500 text-white' : themeColors.button}`}>{time} sec</button>))}</div></div>
-        <div className={`space-y-3 p-4 rounded-2xl transition-colors ${categoryError ? 'bg-red-500/10 border-2 border-red-500' : ''}`}><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.categories}</h3><div className="space-y-2">{(CONFIG.availableCategories as Category[]).map(cat => { const isLocked = CONFIG.showPaywall && !ownedCategories.includes(cat); const isSelected = localSettings.categories.includes(cat); const getCatName = (c: Category) => { const names: Record<string, string> = { party: t.catParty, dirty: t.catDirty, extreme: t.catExtreme, movies: t.catMovies || 'Movies', food: t.catFood || 'Food', animals: t.catAnimals || 'Animals', sports: t.catSports || 'Sports', travel: t.catTravel || 'Travel', professions: t.catProfessions || 'Professions', cartoons: t.catCartoons || 'Cartoons', toys: t.catToys || 'Toys', nature: t.catNature || 'Nature', music: t.catMusic || 'Music', videogames: t.catVideogames || 'Video Games', superheroes: t.catSuperheroes || 'Superheroes', history: t.catHistory || 'History', science: t.catScience || 'Science', brands: t.catBrands || 'Brands' }; return names[c] || c; }; const getCatDesc = (c: Category) => { const descs: Record<string, string> = { party: t.catPartyDesc, dirty: t.catDirtyDesc, extreme: t.catExtremeDesc, movies: t.catMoviesDesc || 'Films and characters', food: t.catFoodDesc || 'Dishes and ingredients', animals: t.catAnimalsDesc || 'Animals and nature', sports: t.catSportsDesc || 'Sports and games', travel: t.catTravelDesc || 'Countries and travel', professions: t.catProfessionsDesc || 'Jobs and occupations', cartoons: t.catCartoonsDesc || 'Animated shows', toys: t.catToysDesc || 'Toys and games', nature: t.catNatureDesc || 'Nature and environment', music: t.catMusicDesc || 'Music and artists', videogames: t.catVideogamesDesc || 'Games and characters', superheroes: t.catSuperheroesDesc || 'Comics and superheroes', history: t.catHistoryDesc || 'Historical events', science: t.catScienceDesc || 'Science and technology', brands: t.catBrandsDesc || 'Famous brands' }; return descs[c] || ''; }; const getLockedPrice = (c: Category) => { if (APP_VARIANT === 'family') { const teensCategories = ['movies', 'sports', 'music', 'videogames', 'superheroes']; return teensCategories.includes(c) ? '$0.99' : '$1.99'; } return c === 'dirty' ? '$2.99' : '$4.99'; }; return (<button key={cat} onClick={() => handleCategoryClick(cat)} className={`w-full p-4 rounded-xl flex items-center justify-between transition-all border-2 ${isSelected ? `border-pink-500 ${isDark ? 'bg-neutral-800' : 'bg-white'}` : `${themeColors.button} border-transparent opacity-90`}`}><div className="text-left"><div className="font-bold text-lg flex items-center gap-2">{getCatName(cat)}{isLocked && <Lock size={16} className="text-orange-500" />}</div><div className={`text-xs ${themeColors.textSub}`}>{getCatDesc(cat)}</div></div>{isSelected ? <CheckCircle className="text-pink-500" /> : (isLocked ? <div className="bg-orange-100 text-orange-600 px-2 py-1 rounded text-xs font-bold">{getLockedPrice(cat)}</div> : null)}</button>); })}</div></div>
+        <div className={`space-y-3 p-4 rounded-2xl transition-colors ${categoryError ? 'bg-red-500/10 border-2 border-red-500' : ''}`}><h3 className={`font-bold uppercase text-sm tracking-wider ${themeColors.textSub}`}>{t.categories}</h3><div className="space-y-2">{(CONFIG.availableCategories as Category[]).map(cat => { const isLocked = CONFIG.showPaywall && !ownedCategories.includes(cat); const isSelected = localSettings.categories.includes(cat); const getCatName = (c: Category) => { const names: Record<string, string> = { party: t.catParty, dirty: t.catDirty, movies: t.catMovies || 'Movies', food: t.catFood || 'Food', animals: t.catAnimals || 'Animals', sports: t.catSports || 'Sports', travel: t.catTravel || 'Travel', professions: t.catProfessions || 'Professions' }; return names[c] || c; }; const getCatDesc = (c: Category) => { const descs: Record<string, string> = { party: t.catPartyDesc, dirty: t.catDirtyDesc, movies: t.catMoviesDesc || 'Films and characters', food: t.catFoodDesc || 'Dishes and ingredients', animals: t.catAnimalsDesc || 'Animals and nature', sports: t.catSportsDesc || 'Sports and games', travel: t.catTravelDesc || 'Countries and travel', professions: t.catProfessionsDesc || 'Jobs and occupations' }; return descs[c] || ''; }; const getLockedPrice = (c: Category) => { if (APP_VARIANT === 'family') { return '$1.99'; } return '$2.99'; }; return (<button key={cat} onClick={() => handleCategoryClick(cat)} className={`w-full p-4 rounded-xl flex items-center justify-between transition-all border-2 ${isSelected ? `border-pink-500 ${isDark ? 'bg-neutral-800' : 'bg-white'}` : `${themeColors.button} border-transparent opacity-90`}`}><div className="text-left"><div className="font-bold text-lg flex items-center gap-2">{getCatName(cat)}{isLocked && <Lock size={16} className="text-orange-500" />}</div><div className={`text-xs ${themeColors.textSub}`}>{getCatDesc(cat)}</div></div>{isSelected ? <CheckCircle className="text-pink-500" /> : (isLocked ? <div className="bg-orange-100 text-orange-600 px-2 py-1 rounded text-xs font-bold">{getLockedPrice(cat)}</div> : null)}</button>); })}</div></div>
         <button onClick={() => updateSettings('penaltyForSkip', !localSettings.penaltyForSkip)} className={`w-full p-4 rounded-xl flex items-center justify-between ${themeColors.button}`}><span className="font-bold">{t.penaltySkip}</span><div className={`w-12 h-6 rounded-full relative transition-colors ${localSettings.penaltyForSkip ? 'bg-pink-500' : 'bg-neutral-600'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${localSettings.penaltyForSkip ? 'left-7' : 'left-1'}`} /></div></button>
         <button onClick={() => updateSettings('soundEnabled', !localSettings.soundEnabled)} className={`w-full p-4 rounded-xl flex items-center justify-between ${themeColors.button}`}><div className="flex items-center gap-2"><Volume2 size={20} /><span className="font-bold">{t.sounds}</span></div><div className={`w-12 h-6 rounded-full relative transition-colors ${localSettings.soundEnabled ? 'bg-green-500' : 'bg-neutral-600'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${localSettings.soundEnabled ? 'left-7' : 'left-1'}`} /></div></button>
         <div className="fixed left-6 right-6 z-10" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}><button onClick={handleSave} className="w-full bg-white text-black py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 shadow-xl border border-neutral-200 touch-manipulation">{t.save}</button></div>
