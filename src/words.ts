@@ -39,7 +39,8 @@ export const DEFAULT_WORD_DATABASE: Record<Language, Partial<Record<Category, st
       "Оргазм", "Эрекция", "Импотенция", "Виагра", "Сиалис", "Возбуждение", "Страсть", "Похоть", "Желание", "Влечение", "Фантазия", "Фетиш", "Комплексы", "Запреты", "Табу", "Извращение", "Норма", "Патология", "Болезнь", "Лечение", "Терапия", "Консультация", "Совет", "Опыт", "Эксперимент", "Поза", "Камасутра", "Миссионерская", "Наездница", "Догги-стайл", "69",
       "Вибратор", "Фаллоимитатор", "Анальная пробка", "Вагинальные шарики", "Вакуумная помпа", "Электростимулятор", "Секс-кукла", "Резиновая женщина",
       "Минет", "Куннилингус", "Анилингус", "Фингеринг", "Петтинг", "Вуайеризм", "Эксгибиционизм", "Стриптиз", "Лап-дэнс", "Тверк", "Глубокая глотка", "Сквирт", "Золотой дождь", "Секс по телефону", "Вирт", "Секстинг", "Порно", "Хентай", "Эротика", "Кастинги", "Вебкам", "Онлифанс", "Порнохаб", "Браззерс", "Групповой секс", "Тройничок", "Свинг", "Обмен партнерами", "Оргия", "Гэнгбэнг",
-      "Секс-шоп", "Страпон", "Бондаж", "Шибари", "Порка", "Шлепки", "Укусы", "Засосы", "Стоны", "Крики", "Вздохи", "Шепот", "Грязные словечки", "Ролевые игры", "Медсестра", "Учительница", "Горничная", "Полицейский", "Сантехник", "Доставщик пиццы", "Босс", "Секретарша", "Беременность", "Контрацепция", "Таблетки", "Спираль", "Пластырь", "Кольцо", "Прерванный акт", "Венеролог", "Молочница", "Цистит", "Простатит", "Геморрой", "Грибок", "Запах", "Вкус", "Размер", "Толщина", "Длина", "Кривизна", "Волосатость"
+      "Секс-шоп", "Страпон", "Бондаж", "Шибари", "Порка", "Шлепки", "Укусы", "Засосы", "Стоны", "Крики", "Вздохи", "Шепот", "Грязные словечки", "Ролевые игры", "Медсестра", "Учительница", "Горничная", "Полицейский", "Сантехник", "Доставщик пиццы", "Босс", "Секретарша", "Беременность", "Контрацепция", "Таблетки", "Спираль", "Пластырь", "Кольцо", "Прерванный акт", "Венеролог", "Молочница", "Цистит", "Простатит", "Геморрой", "Грибок", "Запах", "Вкус", "Размер", "Толщина", "Длина", "Кривизна", "Волосатость",
+      "Щекотка", "Массаж", "Стонать", "Раком", "Верхом", "Связывать", "Завязывать глаза", "Облизывать", "Щипать", "Дуть", "Обнимать сзади", "Прижиматься", "Тантрический секс", "Эрогенная зона", "Мастурбация", "Оральный секс", "Анальный секс", "Быстрый перепих", "Утренний секс", "Секс в воде", "Секс стоя", "Обратная наездница", "Ложки", "Поза лотоса", "Колесо", "Мостик", "Секс-качели", "Секс-машина", "Эротический массаж", "Нуру-массаж", "Стриптиз-клуб", "Пип-шоу", "Фут-фетиш", "Доминация", "Подчинение", "Госпожа", "Раб", "Ошейник", "Поводок", "Зажимы для сосков", "Воск", "Перо", "Кубик льда", "Эротическое белье", "Пеньюар шелковый", "Подвязки", "Сетчатые чулки", "Стрип-покер", "Бутылочка", "Семь минут в раю", "Секс-марафон", "Поцелуй в шею"
     ]
   },
   en: {
@@ -106,7 +107,8 @@ export const DEFAULT_WORD_DATABASE: Record<Language, Partial<Record<Category, st
       "Moaning", "Screaming", "Sighing", "Whispering", "Dirty talk", "Role play", "Nurse", "Teacher", "Maid", "Cop", "Plumber", 
       "Pizza delivery guy", "Boss", "Secretary", "Pregnancy", "Contraception", "Birth control pills", "IUD", "Patch", "Ring", "Pulling out", 
       "STD doctor", "Yeast infection", "Cystitis", "Prostatitis", "Hemorrhoids", "Fungus", "Smell", "Taste", "Size", "Girth", "Length", 
-      "Curvature", "Hairiness"
+      "Curvature", "Hairiness",
+      "Tickling", "Massage", "Moaning", "On all fours", "On top", "Tying up", "Blindfolding", "Licking all over", "Pinching", "Blowing", "Hugging from behind", "Grinding", "Tantric sex", "Erogenous zone", "Masturbation", "Oral sex", "Anal sex", "Quickie", "Morning sex", "Sex in water", "Standing sex", "Reverse cowgirl", "Spooning", "Lotus position", "Wheelbarrow", "Bridge position", "Sex swing", "Sex machine", "Erotic massage", "Nuru massage", "Strip club", "Peep show", "Foot fetish", "Domination", "Submission", "Dominatrix", "Slave", "Collar", "Leash", "Nipple clamps", "Wax play", "Feather", "Ice cube", "Erotic lingerie", "Silk negligee", "Garters", "Fishnet stockings", "Strip poker", "Spin the bottle", "Seven minutes in heaven", "Sex marathon", "Neck kiss"
     ]
   },
   es: {
@@ -175,7 +177,8 @@ export const DEFAULT_WORD_DATABASE: Record<Language, Partial<Record<Category, st
       "Shibari", "Azotes", "Bofetadas", "Mordiscos", "Chupetones", "Gemidos", "Gritos", "Suspiros", "Susurros", "Guarradas", "Juego de roles", 
       "Enfermera", "Profesora", "Criada", "Policía", "Fontanero", "Repartidor de pizza", "Jefe", "Secretaria", "Embarazo", "Anticoncepción", 
       "Pastillas", "DIU", "Parche", "Anillo", "Marcha atrás", "Venereólogo", "Candidiasis", "Cistitis", "Prostatitis", "Hemorroides", "Hongos", 
-      "Olor", "Sabor", "Tamaño", "Grosor", "Largo", "Curvatura", "Vellosidad"
+      "Olor", "Sabor", "Tamaño", "Grosor", "Largo", "Curvatura", "Vellosidad",
+      "Cosquillas", "Masaje", "Gemir", "A cuatro patas", "Encima", "Atar", "Vendar los ojos", "Lamer todo el cuerpo", "Pellizcar", "Soplar", "Abrazar por detrás", "Restregarse", "Sexo tántrico", "Zona erógena", "Masturbación", "Sexo oral", "Sexo anal", "Polvo rápido", "Sexo matutino", "Sexo en el agua", "Sexo de pie", "Vaquera inversa", "Cucharita", "Posición del loto", "Carretilla", "Puente", "Columpio sexual", "Máquina sexual", "Masaje erótico", "Masaje nuru", "Club de striptease", "Peep show", "Fetiche de pies", "Dominación", "Sumisión", "Dominatriz", "Esclavo", "Collar", "Correa", "Pinzas para pezones", "Cera caliente", "Pluma", "Cubito de hielo", "Lencería erótica", "Picardías de seda", "Ligas", "Medias de rejilla", "Póker de striptease", "La botella", "Siete minutos en el paraíso", "Maratón de sexo", "Beso en el cuello"
     ]
   },
   ua: {
@@ -239,7 +242,8 @@ export const DEFAULT_WORD_DATABASE: Record<Language, Partial<Record<Category, st
       "Шмагання", "Ляпаси", "Укуси", "Засоси", "Стогони", "Крики", "Зітхання", "Шепіт", "Брудні слівця", "Рольові ігри", "Медсестра", 
       "Вчителька", "Покоївка", "Поліцейський", "Сантехнік", "Доставщик піци", "Бос", "Секретарка", "Вагітність", "Контрацепція", "Пігулки", 
       "Спіраль", "Пластир", "Кільце", "Перерваний акт", "Венеролог", "Молочниця", "Цистит", "Простатит", "Геморой", "Грибок", "Запах", "Смак", 
-      "Розмір", "Товщина", "Довжина", "Кривизна", "Волохатість"
+      "Розмір", "Товщина", "Довжина", "Кривизна", "Волохатість",
+      "Лоскотання", "Масаж", "Стогнати", "Раком", "Верхи", "Зв'язувати", "Зав'язувати очі", "Облизувати", "Щипати", "Дути", "Обіймати ззаду", "Притискатися", "Тантричний секс", "Ерогенна зона", "Мастурбація", "Оральний секс", "Анальний секс", "Швидкий перепихон", "Ранковий секс", "Секс у воді", "Секс стоячи", "Зворотна наїзниця", "Ложечки", "Поза лотоса", "Тачка", "Місток", "Секс-гойдалка", "Секс-машина", "Еротичний масаж", "Нуру-масаж", "Стриптиз-клуб", "Піп-шоу", "Фут-фетиш", "Домінація", "Підкорення", "Пані", "Раб", "Нашийник", "Повідець", "Затискачі для сосків", "Віск", "Пір'їнка", "Кубик льоду", "Еротична білизна", "Шовковий пеньюар", "Підв'язки", "Сітчасті панчохи", "Стріп-покер", "Пляшечка", "Сім хвилин у раю", "Секс-марафон", "Поцілунок у шию"
     ]
   }
 };
