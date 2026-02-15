@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Icon Converter</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .icon-preview {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .icon-container {
+            text-align: center;
+        }
+        .icon-container h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        svg {
+            width: 200px;
+            height: 200px;
+            border-radius: 44px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        canvas {
+            display: none;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #ec4899;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 GuessUs App Icon Converter</h1>
+        <p>Convert SVG icons to PNG format for App Store submission.</p>
+        
+        <div class="icon-preview">
+            <div class="icon-container">
+                <h3>Family Version (4+)</h3>
+                <svg id="familyIcon" width="200" height="200" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="familyBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="bubbleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+                            <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:0.9" />
+                        </linearGradient>
+                        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feMorphology operator="dilate" radius="2"/>
+                            <feOffset dx="0" dy="4" result="offset" />
+                            <feFlood flood-color="#000000" flood-opacity="0.1"/>
+                            <feComposite in="SourceGraphic" in2="offset" operator="over"/>
+                        </filter>
+                    </defs>
+                    <rect width="1024" height="1024" rx="225" ry="225" fill="url(#familyBg)"/>
+                    <ellipse cx="512" cy="420" rx="320" ry="250" fill="url(#bubbleGradient)" filter="url(#shadow)"/>
+                    <path d="M 250 580 Q 200 640 150 680 Q 190 650 250 600" fill="url(#bubbleGradient)"/>
+                    <text x="512" y="500" font-family="system-ui, -apple-system, sans-serif" font-size="280" font-weight="900" text-anchor="middle" fill="#ec4899">?</text>
+                    <circle cx="750" cy="220" r="45" fill="#ffffff" opacity="0.7"/>
+                    <circle cx="820" cy="180" r="30" fill="#ffffff" opacity="0.5"/>
+                    <circle cx="880" cy="150" r="20" fill="#ffffff" opacity="0.4"/>
+                    <rect x="150" y="750" width="80" height="80" rx="15" fill="#fbbf24" opacity="0.8"/>
+                    <text x="190" y="800" font-family="system-ui" font-size="40" font-weight="700" text-anchor="middle" fill="#ffffff">A</text>
+                    <rect x="260" y="780" width="80" height="80" rx="15" fill="#10b981" opacity="0.8"/>
+                    <text x="300" y="830" font-family="system-ui" font-size="40" font-weight="700" text-anchor="middle" fill="#ffffff">B</text>
+                    <rect x="370" y="760" width="80" height="80" rx="15" fill="#3b82f6" opacity="0.8"/>
+                    <text x="410" y="810" font-family="system-ui" font-size="40" font-weight="700" text-anchor="middle" fill="#ffffff">C</text>
+                    <polygon points="650,800 665,835 700,835 672,857 680,892 650,875 620,892 628,857 600,835 635,835" fill="#fbbf24" opacity="0.7"/>
+                    <polygon points="750,750 760,775 785,775 765,790 770,815 750,805 730,815 735,790 715,775 740,775" fill="#f97316" opacity="0.6"/>
+                    <polygon points="850,780 858,800 878,800 863,812 868,832 850,824 832,832 837,812 822,800 842,800" fill="#ef4444" opacity="0.6"/>
+                </svg>
+                <br>
+                <button class="download-btn" onclick="downloadIcon('familyIcon', 'GuessUs_Family_Icon_1024x1024.png')">
+                    Download PNG (1024×1024)
+                </button>
+            </div>
+            
+            <div class="icon-container">
+                <h3>Adult Version (17+)</h3>
+                <svg id="adultIcon" width="200" height="200" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="adultBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1e1b4b;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="bubbleGradientAdult" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+                            <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:0.9" />
+                        </linearGradient>
+                        <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ec4899;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.3" />
+                        </linearGradient>
+                        <filter id="shadowAdult" x="-50%" y="-50%" width="200%" height="200%">
+                            <feMorphology operator="dilate" radius="2"/>
+                            <feOffset dx="0" dy="6" result="offset" />
+                            <feFlood flood-color="#000000" flood-opacity="0.2"/>
+                            <feComposite in="SourceGraphic" in2="offset" operator="over"/>
+                        </filter>
+                    </defs>
+                    <rect width="1024" height="1024" rx="225" ry="225" fill="url(#adultBg)"/>
+                    <ellipse cx="512" cy="400" rx="400" ry="300" fill="url(#glowGradient)" opacity="0.4"/>
+                    <ellipse cx="512" cy="420" rx="300" ry="230" fill="url(#bubbleGradientAdult)" filter="url(#shadowAdult)"/>
+                    <path d="M 280 580 Q 220 640 180 680 Q 230 650 280 600" fill="url(#bubbleGradientAdult)"/>
+                    <circle cx="450" cy="420" r="25" fill="#ec4899"/>
+                    <circle cx="512" cy="420" r="25" fill="#a855f7"/>
+                    <circle cx="574" cy="420" r="25" fill="#8b5cf6"/>
+                    <rect x="650" y="150" width="120" height="60" rx="30" fill="#dc2626" opacity="0.9"/>
+                    <text x="710" y="190" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#ffffff">18+</text>
+                    <circle cx="200" cy="200" r="35" fill="#ffffff" opacity="0.15"/>
+                    <circle cx="150" cy="250" r="25" fill="#ffffff" opacity="0.1"/>
+                    <path d="M 750 750 L 750 820 L 730 820 L 730 850 L 790 850 L 790 820 L 770 820 L 770 750 L 800 750 L 800 700 L 720 700 L 720 750 Z" fill="#ffffff" opacity="0.2"/>
+                    <ellipse cx="760" cy="700" rx="40" ry="15" fill="#ffffff" opacity="0.2"/>
+                    <rect x="150" y="750" width="60" height="60" rx="30" fill="#fbbf24" opacity="0.6"/>
+                    <circle cx="180" cy="780" r="8" fill="#ffffff"/>
+                    <rect x="240" y="780" width="60" height="60" rx="30" fill="#a855f7" opacity="0.6"/>
+                    <circle cx="270" cy="810" r="8" fill="#ffffff"/>
+                    <rect x="850" y="750" width="80" height="80" rx="15" fill="#1f2937" opacity="0.7"/>
+                    <circle cx="870" cy="770" r="6" fill="#ffffff"/>
+                    <circle cx="900" cy="770" r="6" fill="#ffffff"/>
+                    <circle cx="870" cy="800" r="6" fill="#ffffff"/>
+                    <circle cx="900" cy="800" r="6" fill="#ffffff"/>
+                    <circle cx="885" cy="785" r="6" fill="#ffffff"/>
+                </svg>
+                <br>
+                <button class="download-btn" onclick="downloadIcon('adultIcon', 'GuessUs_Adult_Icon_1024x1024.png')">
+                    Download PNG (1024×1024)
+                </button>
+            </div>
+        </div>
+
+        <canvas id="canvas" width="1024" height="1024"></canvas>
+
+        <div class="instructions">
+            <h3>📝 Instructions</h3>
+            <ol>
+                <li>Click the "Download PNG" button for each version</li>
+                <li>The icons will be saved as 1024×1024 PNG files</li>
+                <li>Use these files for App Store Connect submission</li>
+                <li>Icons are designed to be readable at 20px minimum size</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function downloadIcon(svgId, filename) {
+            const svg = document.getElementById(svgId);
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Create a new SVG element with proper size
+            const svgClone = svg.cloneNode(true);
+            svgClone.setAttribute('width', '1024');
+            svgClone.setAttribute('height', '1024');
+            
+            // Convert SVG to data URL
+            const svgData = new XMLSerializer().serializeToString(svgClone);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            // Create image from SVG
+            const img = new Image();
+            img.onload = function() {
+                // Clear canvas and draw image
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, 1024, 1024);
+                
+                // Convert to PNG and download
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/png');
+                
+                URL.revokeObjectURL(svgUrl);
+            };
+            
+            img.src = svgUrl;
+        }
+    </script>
+</body>
+</html>

@@ -15,6 +15,19 @@ import {
   getOwnedCategoriesFromPurchases,
   type ProductId as IAPProductId 
 } from './utils/purchases';
+import {
+  initializeAnalytics,
+  logGameStart,
+  logGameEnd,
+  logWordGuessed,
+  logWordSkipped,
+  logPurchaseInitiated,
+  logPurchaseCompleted,
+  logCategorySelected,
+  logSettingsChanged,
+  logScreenView,
+  logError
+} from './utils/analytics';
 
 // --- Types ---
 
@@ -340,6 +353,8 @@ const useGameEngine = () => {
   const [gameWords, setGameWords] = useState<string[]>([]);
   const [wordIndex, setWordIndex] = useState(0);
   const [currentRoundWords, setCurrentRoundWords] = useState<RoundWord[]>([]);
+  const [gameStartTime, setGameStartTime] = useState<number>(0);
+  const [roundNumber, setRoundNumber] = useState(0);
   
   const t = TRANSLATIONS[settings.uiLanguage] || TRANSLATIONS['en'];
   const themeColors = useTheme(settings.theme);
@@ -355,6 +370,11 @@ const useGameEngine = () => {
     
     // Initialize remote dictionary system (checks for updates in background)
     initializeDictionary();
+    
+    // Initialize Firebase Analytics and Crashlytics
+    initializeAnalytics().catch(err => {
+      console.error('Failed to initialize analytics:', err);
+    });
     
     // Initialize In-App Purchases (only for Adult version)
     if (CONFIG.showPaywall) {
@@ -409,19 +429,26 @@ const useGameEngine = () => {
 
   const buyProduct = async (productId: ProductId): Promise<boolean> => {
       try {
+        // Analytics: track purchase initiated
+        const product = PRODUCTS[productId];
+        logPurchaseInitiated({ productId, price: product?.price });
+        
         // Attempt real purchase (will simulate in dev mode)
         const success = await purchaseProduct(productId as IAPProductId);
         
         if (success) {
-          const product = PRODUCTS[productId];
           const newOwned = [...ownedCategories, ...product.unlocks];
           const uniqueOwned = Array.from(new Set(newOwned));
           setOwnedCategories(uniqueOwned);
+          
+          // Analytics: track purchase completed
+          logPurchaseCompleted({ productId, price: product?.price });
           return true;
         }
         return false;
       } catch (error) {
         console.error('Purchase failed:', error);
+        logError(error as Error, { context: 'purchase', productId });
         return false;
       }
   };
@@ -484,9 +511,22 @@ const useGameEngine = () => {
       setWordIndex(0);
       setSettings({ ...activeSettings, teams: teamsWithPlayers });
       setCurrentTeamIndex(0);
+      setGameStartTime(Date.now());
+      setRoundNumber(1);
       setGameState('preRound');
+      
+      // Analytics: track game start
+      const totalPlayers = teamsWithPlayers.reduce((sum, t) => sum + t.players.length, 0);
+      logGameStart({
+        categories: activeSettings.categories,
+        playersCount: totalPlayers,
+        teamCount: teamsWithPlayers.length,
+        targetScore: activeSettings.targetScore,
+        roundDuration: activeSettings.roundDuration
+      });
     } catch (error) {
        console.error("Error starting game:", error);
+       logError(error as Error, { context: 'start_game' });
        alert("Could not start game.");
     }
   }, [settings, ownedCategories]);
@@ -511,8 +551,22 @@ const useGameEngine = () => {
     }
     if (settings.soundEnabled) soundManager.play(status === 'guessed' ? 'correct' : 'skip');
     
-    if (gameWords[wordIndex]) {
-        setCurrentRoundWords(prev => [...prev, { word: gameWords[wordIndex], status }]);
+    const currentWordValue = gameWords[wordIndex];
+    if (currentWordValue) {
+        setCurrentRoundWords(prev => [...prev, { word: currentWordValue, status }]);
+        
+        // Analytics: track word action
+        const wordEventParams = {
+          word: currentWordValue,
+          category: settings.categories[0] || 'unknown',
+          teamName: settings.teams[currentTeamIndex]?.name || 'unknown',
+          roundNumber
+        };
+        if (status === 'guessed') {
+          logWordGuessed(wordEventParams);
+        } else {
+          logWordSkipped(wordEventParams);
+        }
     }
     
     const nextIndex = wordIndex + 1;
@@ -526,7 +580,7 @@ const useGameEngine = () => {
     if (gameState === 'lastWord') {
       setGameState('verification');
     }
-  }, [settings.soundEnabled, gameWords, wordIndex, gameState]);
+  }, [settings.soundEnabled, settings.categories, settings.teams, gameWords, wordIndex, gameState, currentTeamIndex, roundNumber]);
 
   const handleTimeUp = useCallback(() => {
     if (settings.soundEnabled) soundManager.play('timeup');
@@ -595,13 +649,25 @@ const useGameEngine = () => {
          setHistory(prev => [newHistory, ...prev]);
          if (settings.soundEnabled) soundManager.play('win');
          haptics.victory(); // Strong haptic for victory
+         
+         // Analytics: track game end
+         const durationSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
+         logGameEnd({
+           winner: winner.name,
+           totalScore: winner.score,
+           durationSeconds,
+           teamCount: settings.teams.length,
+           mvp: bestPlayer
+         });
+         
          setGameState('winner');
          return;
        }
     }
     setCurrentTeamIndex(prev => (prev + 1) % settings.teams.length);
+    setRoundNumber(prev => prev + 1);
     setGameState('preRound');
-  }, [currentTeamIndex, settings.teams, settings.targetScore, settings.soundEnabled]);
+  }, [currentTeamIndex, settings.teams, settings.targetScore, settings.soundEnabled, gameStartTime]);
 
   // Memoize actions object to prevent unnecessary re-renders
   const actions = useMemo(() => ({

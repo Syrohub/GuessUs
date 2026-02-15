@@ -1,0 +1,76 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="adultBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e1b4b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bubbleGradientAdult" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:0.9" />
+    </linearGradient>
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.3" />
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feMorphology operator="dilate" radius="3"/>
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadowAdult" x="-50%" y="-50%" width="200%" height="200%">
+      <feMorphology operator="dilate" radius="2"/>
+      <feOffset dx="0" dy="6" result="offset" />
+      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+      <feComposite in="SourceGraphic" in2="offset" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- App icon rounded background -->
+  <rect width="1024" height="1024" rx="225" ry="225" fill="url(#adultBg)"/>
+  
+  <!-- Subtle glow effect -->
+  <ellipse cx="512" cy="400" rx="400" ry="300" fill="url(#glowGradient)" opacity="0.4"/>
+  
+  <!-- Main speech bubble - more sophisticated shape -->
+  <ellipse cx="512" cy="420" rx="300" ry="230" fill="url(#bubbleGradientAdult)" filter="url(#shadowAdult)"/>
+  
+  <!-- Bubble tail -->
+  <path d="M 280 580 Q 220 640 180 680 Q 230 650 280 600" fill="url(#bubbleGradientAdult)"/>
+  
+  <!-- Mysterious dots instead of question mark -->
+  <circle cx="450" cy="420" r="25" fill="#ec4899"/>
+  <circle cx="512" cy="420" r="25" fill="#a855f7"/>
+  <circle cx="574" cy="420" r="25" fill="#8b5cf6"/>
+  
+  <!-- 18+ badge -->
+  <rect x="650" y="150" width="120" height="60" rx="30" fill="#dc2626" opacity="0.9"/>
+  <text x="710" y="190" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#ffffff">18+</text>
+  
+  <!-- Elegant decorative elements -->
+  <circle cx="200" cy="200" r="35" fill="#ffffff" opacity="0.15"/>
+  <circle cx="150" cy="250" r="25" fill="#ffffff" opacity="0.1"/>
+  
+  <!-- Wine glass silhouette -->
+  <path d="M 750 750 L 750 820 L 730 820 L 730 850 L 790 850 L 790 820 L 770 820 L 770 750 L 800 750 L 800 700 L 720 700 L 720 750 Z" fill="#ffffff" opacity="0.2"/>
+  <ellipse cx="760" cy="700" rx="40" ry="15" fill="#ffffff" opacity="0.2"/>
+  
+  <!-- Sophisticated party elements -->
+  <rect x="150" y="750" width="60" height="60" rx="30" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="180" cy="780" r="8" fill="#ffffff"/>
+  
+  <rect x="240" y="780" width="60" height="60" rx="30" fill="#a855f7" opacity="0.6"/>
+  <circle cx="270" cy="810" r="8" fill="#ffffff"/>
+  
+  <!-- Dice -->
+  <rect x="850" y="750" width="80" height="80" rx="15" fill="#1f2937" opacity="0.7"/>
+  <circle cx="870" cy="770" r="6" fill="#ffffff"/>
+  <circle cx="900" cy="770" r="6" fill="#ffffff"/>
+  <circle cx="870" cy="800" r="6" fill="#ffffff"/>
+  <circle cx="900" cy="800" r="6" fill="#ffffff"/>
+  <circle cx="885" cy="785" r="6" fill="#ffffff"/>
+</svg>

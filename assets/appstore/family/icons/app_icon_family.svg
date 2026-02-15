@@ -1,0 +1,51 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="familyBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bubbleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:0.9" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feMorphology operator="dilate" radius="2"/>
+      <feOffset dx="0" dy="4" result="offset" />
+      <feFlood flood-color="#000000" flood-opacity="0.1"/>
+      <feComposite in="SourceGraphic" in2="offset" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- App icon rounded background -->
+  <rect width="1024" height="1024" rx="225" ry="225" fill="url(#familyBg)"/>
+  
+  <!-- Main speech bubble -->
+  <ellipse cx="512" cy="420" rx="320" ry="250" fill="url(#bubbleGradient)" filter="url(#shadow)"/>
+  
+  <!-- Bubble tail -->
+  <path d="M 250 580 Q 200 640 150 680 Q 190 650 250 600" fill="url(#bubbleGradient)"/>
+  
+  <!-- Question mark inside bubble -->
+  <text x="512" y="500" font-family="system-ui, -apple-system, sans-serif" font-size="280" font-weight="900" text-anchor="middle" fill="#ec4899">?</text>
+  
+  <!-- Small decorative bubbles -->
+  <circle cx="750" cy="220" r="45" fill="#ffffff" opacity="0.7"/>
+  <circle cx="820" cy="180" r="30" fill="#ffffff" opacity="0.5"/>
+  <circle cx="880" cy="150" r="20" fill="#ffffff" opacity="0.4"/>
+  
+  <!-- Game elements -->
+  <rect x="150" y="750" width="80" height="80" rx="15" fill="#fbbf24" opacity="0.8"/>
+  <text x="190" y="800" font-family="system-ui" font-size="40" font-weight="700" text-anchor="middle" fill="#ffffff">A</text>
+  
+  <rect x="260" y="780" width="80" height="80" rx="15" fill="#10b981" opacity="0.8"/>
+  <text x="300" y="830" font-family="system-ui" font-size="40" font-weight="700" text-anchor="middle" fill="#ffffff">B</text>
+  
+  <rect x="370" y="760" width="80" height="80" rx="15" fill="#3b82f6" opacity="0.8"/>
+  <text x="410" y="810" font-family="system-ui" font-size="40" font-weight="700" text-anchor="middle" fill="#ffffff">C</text>
+  
+  <!-- Family-friendly stars -->
+  <polygon points="650,800 665,835 700,835 672,857 680,892 650,875 620,892 628,857 600,835 635,835" fill="#fbbf24" opacity="0.7"/>
+  <polygon points="750,750 760,775 785,775 765,790 770,815 750,805 730,815 735,790 715,775 740,775" fill="#f97316" opacity="0.6"/>
+  <polygon points="850,780 858,800 878,800 863,812 868,832 850,824 832,832 837,812 822,800 842,800" fill="#ef4444" opacity="0.6"/>
+</svg>
