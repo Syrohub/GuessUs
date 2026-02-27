@@ -17,6 +17,7 @@ import {
 } from './utils/purchases';
 import {
   initializeAnalytics,
+  logAppOpen,
   logGameStart,
   logGameEnd,
   logWordGuessed,
@@ -371,6 +372,9 @@ const useGameEngine = () => {
     initializeAnalytics().catch(err => {
       console.error('Failed to initialize analytics:', err);
     });
+
+    // Analytics: track app open
+    logAppOpen();
     
     // Initialize In-App Purchases (only for Adult version)
     if (CONFIG.showPaywall) {

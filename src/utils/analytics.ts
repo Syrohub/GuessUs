@@ -21,6 +21,22 @@ import { APP_VARIANT } from '../config';
 let isInitialized = false;
 
 /**
+ * Log app_open event
+ */
+export async function logAppOpen(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+
+  try {
+    await FirebaseAnalytics.logEvent({
+      name: 'app_open',
+      params: {}
+    });
+    console.log('[Analytics] app_open logged');
+  } catch (error) {
+    console.error('[Analytics] Failed to log app_open:', error);
+  }
+}
+/**
  * Initialize Firebase Analytics and Crashlytics
  */
 export async function initializeAnalytics(): Promise<void> {
